@@ -1,0 +1,13 @@
+*.zip
+*.opus
+*.ogg
+*.m4a
+*.mp3
+*.wav
+*.jpg
+*.jpeg
+*.png
+*.mp4
+_chat.txt
+WhatsApp Chat*.txt
+.DS_Store
