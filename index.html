@@ -809,7 +809,7 @@ async function deleteItem(){
 /* ============ startup ============ */
 function setBanner(html){ $("#banner").innerHTML = html ? `<p class="banner">${html}</p>` : ""; }
 async function init(){
-  if (!window.claude || typeof window.claude.use !== "function"){ startPreview("Storage isn't available on this page."); return; }
+  if (!window.claude || typeof window.claude.use !== "function"){ startPreview("This is the standalone demo copy of the archive, so uploads stay in this tab."); return; }
   let db = null, assets = null, user = null;
   try { [db, assets, user] = await Promise.all([claude.use("db"), claude.use("assets"), claude.use("user")]); } catch(e){}
   S.db = db; S.assets = assets; S.user = user;
