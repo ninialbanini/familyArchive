@@ -47,6 +47,12 @@ The live archive is the Claude artifact, not this repo. **No recordings or photo
 
 If you open `index.html` anywhere else, such as GitHub Pages or a local file, there's no storage. The app runs in **Preview mode**: imports work so you can try them, but nothing is saved. Hosting it on its own would need its own storage backend, for example Firebase or Supabase.
 
+## Demo for presentations
+
+Opened on its own (for example on GitHub Pages), the app runs as a **demo copy** that doesn't save. The Add page has a **Try it with a sample chat** button. It imports `demo/sample-chat.zip`, a small sample WhatsApp export, in front of the audience, so you don't need a real file on hand.
+
+The sample has 4 voice notes and 3 photos from senders marked "(sample)". The voice notes are short plucked melodies, not real family recordings, and the photos are drawn illustrations. To use real ones, replace `demo/sample-chat.zip` with an export your family is happy to have public. The repo is public, so anything in `demo/` can be seen by anyone.
+
 ## Privacy
 
 This is family material. Don't commit chat exports, voice notes or photos to this repository, especially while it's public.

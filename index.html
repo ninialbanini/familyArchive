@@ -136,6 +136,8 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .teacorner{position:relative;height:360px;margin:10px calc(-1 * clamp(18px,4vw,48px)) 0;pointer-events:none}
 .rugcorner{position:absolute;left:0;bottom:0;width:420px;height:360px;filter:drop-shadow(3px -2px 5px rgba(0,0,0,.35))}
 .teaglass{position:absolute;left:150px;bottom:40px;width:150px;height:186px}
+.demobox{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:16px 0 0;padding:14px 16px;border:2px dashed var(--red-ink);border-radius:8px;background:color-mix(in srgb,var(--paper) 70%,transparent);position:relative;z-index:2}
+.demotag{display:inline-block;margin:6px 0 10px;padding:3px 10px;background:#161616;color:#EDEDED;border-radius:3px;font-family:'Special Elite',monospace;font-size:13px;letter-spacing:.12em;transform:rotate(-1deg)}
 .locked{padding:18px;border:1.5px dashed var(--muted);border-radius:6px}
 
 /* tab bar */
@@ -236,6 +238,10 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
       <p class="nast" lang="fa" style="margin:0">چای و قصه</p>
     </div>
     <p class="hand" id="impNote" style="font-size:22px;margin:4px 0 0">drop the whole chat export here, every voice note and photo inside becomes a card</p>
+    <div class="demobox" id="demoBox" hidden>
+      <button type="button" class="btn primary" id="demoBtn">Try it with a sample chat</button>
+      <span class="hand" style="font-size:21px;line-height:1.1">a small sample WhatsApp export: 4 voice notes and 3 photos, so you can watch an import happen</span>
+    </div>
     <div id="addLocked" class="locked" hidden>You can browse and listen. Only people with edit access can bring in new voice notes.</div>
     <div class="addgrid" id="importer">
       <div class="promptwrap"><svg class="pclip" style="right:22px;top:-20px" viewBox="0 0 30 80" aria-hidden="true"><path d="M20 22 V 66 a 8 8 0 0 1 -16 0 V 10 a 11 11 0 0 1 22 0 V 58" fill="none" stroke="#4A4A4A" stroke-width="2.6" stroke-linecap="round"></path></svg>
@@ -344,7 +350,7 @@ function fmtDur(s){ if(!isFinite(s) || s == null) return ""; s = Math.round(s); 
 function fmtDate(ms, withTime){ if(!ms) return "Unknown date"; const d = new Date(ms);
   const o = {day:"numeric", month:"short", year:"numeric"}; if(withTime){o.hour="numeric";o.minute="2-digit";}
   return d.toLocaleString("en", o); }
-function initials(name){ const n = (name||"?").trim(); if(!n) return "?"; const parts = n.split(/\s+/); return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase(); }
+function initials(name){ const parts = (name||"").trim().split(/\s+/).filter(w => /^\p{L}/u.test(w)); if(!parts.length) return "?"; return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase(); }
 function avColor(name){ let h = 0; for (const c of (name||"")) h = (h*31 + c.codePointAt(0)) >>> 0; return AV_COLORS[h % AV_COLORS.length]; }
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 3200); }
 async function sha(s){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].slice(0,16).map(x=>x.toString(16).padStart(2,"0")).join(""); }
@@ -648,6 +654,7 @@ async function handleFiles(list){
           title:"", type:"", words:"", translation:"", story:"", place:""};
         await saveNew(rec, prepared);
         added++;
+        if (S.demoDelay) await new Promise(r => setTimeout(r, S.demoDelay));
         logLine(kindWord(c.kind) + " from " + (rec.sender || "someone") + ", " + (rec.dateMs ? new Date(rec.dateMs).toLocaleDateString("en", {month:"short", day:"numeric", year:"numeric"}) : "date unknown"));
       } catch (e){
         const msg = e && e.code === "quota_or_state" ? "storage is full" : e && e.code === "quota_exceeded" ? "the archive's database is full" :
@@ -657,7 +664,7 @@ async function handleFiles(list){
       }
       setProgress(done, jobs.length);
     }
-    setProgress(jobs.length, jobs.length, "Done: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + (skipped.length ? ", " + skipped.length + " skipped" : "") + "." + (S.preview ? " (Preview mode: nothing was saved.)" : ""));
+    setProgress(jobs.length, jobs.length, "Done: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + (skipped.length ? ", " + skipped.length + " skipped" : "") + "." + (S.demo ? " (Demo copy: nothing is saved.)" : S.preview ? " (Preview mode: nothing was saved.)" : ""));
   } catch (e){
     $("#progressText").textContent = "The import stopped: " + ((e && e.message) || "the file couldn't be opened") + ". Nothing after this point was added.";
   } finally {
@@ -809,7 +816,7 @@ async function deleteItem(){
 /* ============ startup ============ */
 function setBanner(html){ $("#banner").innerHTML = html ? `<p class="banner">${html}</p>` : ""; }
 async function init(){
-  if (!window.claude || typeof window.claude.use !== "function"){ startPreview("This is the standalone demo copy of the archive, so uploads stay in this tab."); return; }
+  if (!window.claude || typeof window.claude.use !== "function"){ startDemo(); return; }
   let db = null, assets = null, user = null;
   try { [db, assets, user] = await Promise.all([claude.use("db"), claude.use("assets"), claude.use("user")]); } catch(e){}
   S.db = db; S.assets = assets; S.user = user;
@@ -864,7 +871,7 @@ function emptyHTML(){
     <h2>Nothing on the runners yet</h2>
     <p style="margin:0 0 8px">This archive fills up from the family WhatsApp chats: the dobaiti, songs, lullabies, stories and photos people have shared.</p>
     ${can ? `<ol style="padding-left:22px"><li>On your phone, open the family chat and choose <b>Export chat</b>, with media.</li><li>Open <b>Add</b> (the red button below) and drop the .zip in.</li><li>Every voice note and photo lands here, month by month, ready for its words and story.</li></ol>
-      <p style="margin:6px 0 0"><a class="btn primary" href="#add">Pour some tea and add a chat</a></p>`
+      <p style="margin:6px 0 0;display:flex;flex-wrap:wrap;gap:10px"><a class="btn primary" href="#add">Pour some tea and add a chat</a>${S.demo ? `<button type="button" class="btn ghost" data-demo>Try the sample chat</button>` : ""}</p>`
     : `<p style="margin:0">When someone with edit access brings in a chat, the voice notes and photos will appear here for you to listen to.</p>`}</div></div></div>`;
 }
 function render(){
@@ -906,6 +913,29 @@ window.addEventListener("hashchange", route);
 $("#searchNav").addEventListener("click", () => { if (location.hash === "#add") location.hash = "#listen"; setTimeout(() => { $("#fQ").focus(); $("#fQ").scrollIntoView({block:"center"}); }, 50); });
 const _observeImporter = new MutationObserver(() => { $("#addLocked").hidden = !$("#importer").hidden; });
 _observeImporter.observe($("#importer"), {attributes:true, attributeFilter:["hidden"]});
+
+/* ===== standalone demo mode ===== */
+function startDemo(){
+  S.preview = true; S.demo = true; S.ready = true; S.storage = false; S.demoDelay = 450;
+  $("#importer").hidden = false; $("#addLocked").hidden = true; $("#demoBox").hidden = false;
+  $("#banner").innerHTML = '<span class="demotag">DEMO COPY · NOTHING IS SAVED</span>';
+  $("#impNote").textContent = "drop a WhatsApp export here, or try the sample chat below";
+  render();
+}
+async function runDemo(){
+  const btn = $("#demoBtn"); if (importing) return;
+  btn.disabled = true; btn.textContent = "Opening the sample chat…";
+  try {
+    const res = await fetch("demo/sample-chat.zip");
+    if (!res.ok) throw new Error("missing");
+    const blob = await res.blob();
+    await handleFiles([new File([blob], "WhatsApp Chat - Family (sample).zip", {type:"application/zip"})]);
+  } catch (e){
+    toast("The sample chat couldn't be loaded. Open this page from its website address, not as a file.");
+  } finally { btn.disabled = false; btn.textContent = "Try it with a sample chat"; }
+}
+$("#demoBtn").addEventListener("click", runDemo);
+document.addEventListener("click", e => { if (e.target.closest("[data-demo]")){ e.preventDefault(); location.hash = "#add"; setTimeout(runDemo, 250); } });
 
 route();
 init();
