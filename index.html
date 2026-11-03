@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;600&family=Special+Elite&family=Caveat:wght@500;600&family=Vazirmatn:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 :root{
   --bg:#3A1410; --sheet:#F1EADC; --paper:#F7F2E8; --kraft:#CDB188; --grey:#B9B3AA; --ink:#2A1D14; --muted:#5A4636; --line:#CDBEA6;
@@ -138,6 +140,17 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .teaglass{position:absolute;left:150px;bottom:40px;width:150px;height:186px}
 .demobox{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:16px 0 0;padding:14px 16px;border:2px dashed var(--red-ink);border-radius:8px;background:color-mix(in srgb,var(--paper) 70%,transparent);position:relative;z-index:2}
 .demotag{display:inline-block;margin:6px 0 10px;padding:3px 10px;background:#161616;color:#EDEDED;border-radius:3px;font-family:'Special Elite',monospace;font-size:13px;letter-spacing:.12em;transform:rotate(-1deg)}
+.loginwrap{max-width:560px;margin:10px auto 0;position:relative;z-index:2}
+.loginwrap h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(32px,5vw,42px);line-height:1.05}
+.loginwrap .nast{font-size:30px;line-height:2.1;color:var(--red-ink);margin:0}
+.acct{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;margin-right:auto;font-size:15px;color:var(--muted)}
+.acct b{color:var(--ink)}
+.famlist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.famlist li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;background:color-mix(in srgb,var(--paper) 70%,transparent);border-radius:6px}
+.famlist li .em{flex:1 1 200px;min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.famlist select{min-height:40px;border:1.5px solid var(--ink);border-radius:6px;background:var(--paper);padding:4px 8px}
+.famadd{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:flex-end}
+.famadd .field{flex:1 1 220px}
 .locked{padding:18px;border:1.5px dashed var(--muted);border-radius:6px}
 
 /* tab bar */
@@ -203,7 +216,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </defs></svg>
 <div class="page">
 <div class="sheetwrap"><div class="sheet">
-  <div class="topbar"><button class="pill" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span id="themeLabel">Dark</span></button></div>
+  <div class="topbar"><span class="acct" id="acct" hidden>Signed in as <b id="acctEmail"></b><button type="button" class="linkbtn" id="famBtn" hidden>Family access</button><button type="button" class="linkbtn" id="signOutBtn">Sign out</button></span><button class="pill" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span id="themeLabel">Dark</span></button></div>
   <div class="headwrap"><svg class="pclip" viewBox="0 0 30 80" aria-hidden="true"><path d="M20 22 V 66 a 8 8 0 0 1 -16 0 V 10 a 11 11 0 0 1 22 0 V 58" fill="none" stroke="#4A4A4A" stroke-width="2.6" stroke-linecap="round"></path></svg><div class="headcard">
     <span class="type" style="font-size:13px;color:#5A3A22">THE FAMILY'S OWN VOICES</span>
     <h1>Family Voice Archive</h1>
@@ -215,6 +228,59 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 <text font-family="Special Elite, monospace" font-size="10" fill="#A3242B" stroke="none" letter-spacing="1.5"><textPath href="#arc" startOffset="50%" text-anchor="middle">FAMILY VOICES</textPath></text>
 <text x="50" y="66" text-anchor="middle" font-family="Vazirmatn, sans-serif" font-size="22" fill="#A3242B" stroke="none">۱۴۰۵</text><path d="M 24 72 L 76 72" stroke-width="1.2"/></g></svg></div>
   <div id="banner"></div>
+
+  <section id="viewLogin" aria-labelledby="loginTitle" hidden>
+    <div class="loginwrap">
+      <div class="promptwrap"><svg class="pclip" style="right:22px;top:-20px" viewBox="0 0 30 80" aria-hidden="true"><path d="M20 22 V 66 a 8 8 0 0 1 -16 0 V 10 a 11 11 0 0 1 22 0 V 58" fill="none" stroke="#4A4A4A" stroke-width="2.6" stroke-linecap="round"></path></svg>
+        <div class="prompt">
+          <span class="type" style="font-size:13px;color:#5A3A22">FOR THE FAMILY</span>
+          <h2 id="loginTitle">Come in, sit down.</h2>
+          <p class="nast" lang="fa">خوش آمدید</p>
+          <div id="loginForm">
+            <form id="loginF" novalidate>
+              <div class="field"><label for="loginEmail">Your email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+              <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="loginBtn">Email me a sign-in link</button></p>
+            </form>
+            <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">no password to remember, the link in your email signs you in</p>
+          </div>
+          <div id="loginSent" hidden>
+            <p class="serif" style="font-size:26px;margin:0">Check your email.</p>
+            <p style="margin:4px 0 0">We sent a sign-in link to <b id="sentTo"></b>. Open it on this device and you'll come straight back here.</p>
+            <p style="margin:8px 0 0"><button type="button" class="linkbtn" id="loginAgain">Use a different email</button></p>
+          </div>
+          <div id="loginNotMember" hidden>
+            <p style="margin:0">You're signed in as <b id="nmEmail"></b>, but that email isn't on the family list yet.</p>
+            <p class="hand" style="font-size:21px;margin:6px 0 0">ask whoever keeps the archive to add you under Family access</p>
+            <p style="margin:10px 0 0"><button type="button" class="btn ghost" id="nmOut">Sign out</button></p>
+          </div>
+          <p class="banner" id="loginErr" role="alert" hidden></p>
+        </div>
+      </div>
+      <p style="margin:22px 0 0;text-align:center"><button type="button" class="linkbtn" id="openDemo">Just looking? Open the demo (nothing is saved)</button></p>
+    </div>
+    <div class="teacorner" aria-hidden="true"><svg class="rugcorner" viewBox="0 0 420 360" aria-hidden="true"><defs>
+<filter id="rl-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" stitchTiles="stitch"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.22  0 0 0 0 0.16  0 0 0 0 0.10  0.75 0 0 0 -0.3"></feColorMatrix></filter>
+<filter id="rl-mottle" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="9"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.15  0.5 0 0 0 -0.18"></feColorMatrix></filter>
+<filter id="rl-wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="2" seed="5" result="t"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="t" scale="6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+<filter id="rl-wear" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="2" result="n"></feTurbulence><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.1" result="m"></feColorMatrix><feComposite in="SourceGraphic" in2="m" operator="in"></feComposite></filter>
+<pattern id="rl-rugA" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#7A1616"></rect><path d="M24 6L42 24 24 42 6 24z" fill="#1E2340"></path><path d="M24 13L35 24 24 35 13 24z" fill="#E6D5B5"></path><path d="M24 18L30 24 24 30 18 24z" fill="#A23B1E"></path><circle cx="24" cy="24" r="2" fill="#C08A3E"></circle><path d="M0 0h4v1H1v3H0zM44 0h4v4h-1V1h-3zM0 44h1v3h3v1H0zM47 44h1v4h-4v-1h3z" fill="#E6D5B5"></path><circle cx="0" cy="24" r="2.5" fill="#C08A3E"></circle><circle cx="48" cy="24" r="2.5" fill="#C08A3E"></circle><circle cx="24" cy="0" r="2.5" fill="#C08A3E"></circle><circle cx="24" cy="48" r="2.5" fill="#C08A3E"></circle></pattern>
+<pattern id="rl-rugB" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#1E2340"></rect><polygon points="14,6 26,6 34,14 34,26 26,34 14,34 6,26 6,14" fill="#7A1616"></polygon><polygon points="17,12 23,12 28,17 28,23 23,28 17,28 12,23 12,17" fill="#E6D5B5"></polygon><circle cx="20" cy="20" r="3" fill="#7A1616"></circle><circle cx="0" cy="0" r="2" fill="#C08A3E"></circle><circle cx="40" cy="0" r="2" fill="#C08A3E"></circle><circle cx="0" cy="40" r="2" fill="#C08A3E"></circle><circle cx="40" cy="40" r="2" fill="#C08A3E"></circle></pattern>
+<pattern id="rl-rugC" width="36" height="36" patternUnits="userSpaceOnUse"><rect width="36" height="36" fill="#4E0F14"></rect><g fill="#C08A3E" opacity="0.85"><ellipse cx="18" cy="12" rx="2.2" ry="4"></ellipse><ellipse cx="18" cy="24" rx="2.2" ry="4"></ellipse><ellipse cx="12" cy="18" rx="4" ry="2.2"></ellipse><ellipse cx="24" cy="18" rx="4" ry="2.2"></ellipse></g><circle cx="18" cy="18" r="2.2" fill="#E6D5B5"></circle><path d="M0 0 Q 6 4 4 9 M36 36 Q 30 32 32 27" stroke="#A23B1E" stroke-width="1.4" fill="none"></path><circle cx="2" cy="34" r="1.5" fill="#E6D5B5" opacity="0.7"></circle></pattern>
+<pattern id="rl-rugG" width="44" height="44" patternUnits="userSpaceOnUse"><rect width="44" height="44" fill="#1F5E3A"></rect><circle cx="22" cy="22" r="8" fill="#E6D5B5"></circle><circle cx="22" cy="22" r="5" fill="#B3262B"></circle><circle cx="22" cy="22" r="2" fill="#C08A3E"></circle><path d="M4 22 Q 10 14 14 22 Q 10 30 4 22 M40 22 Q 34 14 30 22 Q 34 30 40 22" fill="#C35A2C"></path><circle cx="0" cy="0" r="3" fill="#E6D5B5"></circle><circle cx="44" cy="44" r="3" fill="#E6D5B5"></circle></pattern>
+<pattern id="rl-brd" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="#E6D5B5"></rect><path d="M10 2L18 10 10 18 2 10z" fill="#7A1616"></path><path d="M10 6L14 10 10 14 6 10z" fill="#1E2340"></path></pattern>
+<pattern id="rl-brd2" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#1E2340"></rect><polygon points="0,16 8,6 16,16" fill="#7A1616"></polygon><circle cx="8" cy="3" r="1.5" fill="#E6D5B5"></circle></pattern>
+</defs><clipPath id="rl-clip"><path d="M0 40 C 70 52, 120 120, 170 170 C 220 220, 250 250, 290 300 C 310 326, 320 344, 330 360 L 0 360 Z"></path></clipPath><g clip-path="url(#rl-clip)"><g filter="url(#rl-wob)"><rect x="-50" y="0" width="420" height="420" fill="url(#rl-brd)"></rect><rect x="-39" y="11" width="398" height="398" fill="#E6D5B5"></rect><rect x="-36" y="14" width="392" height="392" fill="url(#rl-rugC)"></rect><path d="M160.0 86.8L312.8 210.0L160.0 333.2L7.199999999999989 210.0z" fill="#1E2340" stroke="#E6D5B5" stroke-width="2"></path><path d="M160.0 100.8L302.8 210.0L160.0 319.2L17.19999999999999 210.0z" fill="#E6D5B5"></path><path d="M160.0 144.48000000000002L245.68 210.0L160.0 275.52L74.32 210.0z" fill="#7A1616"></path><circle cx="160.0" cy="210.0" r="21.8" fill="#C08A3E"></circle><rect x="-50" y="0" width="420" height="37" fill="#3A0A08" opacity="0.05"></rect><rect x="-50" y="52" width="420" height="32" fill="#8A5A2A" opacity="0.16"></rect><rect x="-50" y="110" width="420" height="34" fill="#3A0A08" opacity="0.05"></rect><rect x="-50" y="144" width="420" height="26" fill="#8A5A2A" opacity="0.15"></rect><rect x="-50" y="184" width="420" height="14" fill="#000000" opacity="0.06"></rect><rect x="-50" y="224" width="420" height="40" fill="#8A5A2A" opacity="0.05"></rect><rect x="-50" y="265" width="420" height="38" fill="#3A0A08" opacity="0.05"></rect><rect x="-50" y="307" width="420" height="21" fill="#3A0A08" opacity="0.10"></rect><rect x="-50" y="340" width="420" height="27" fill="#000000" opacity="0.12"></rect><rect x="-50" y="369" width="420" height="14" fill="#3A0A08" opacity="0.09"></rect><rect x="-50" y="405" width="420" height="21" fill="#000000" opacity="0.11"></rect><rect x="-50" y="0" width="420" height="420" filter="url(#rl-mottle)" opacity="0.8"></rect></g></g></svg><svg width="150" height="186" viewBox="0 0 120 150" aria-hidden="true" class="teaglass" style=" filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.4))">
+<defs><filter id="teawob2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" seed="8" result="t"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="t" scale="3"></feDisplacementMap></filter></defs><g filter="url(#teawob2)">
+<ellipse cx="60" cy="128" rx="56" ry="17" fill="#F2EEE6" stroke="#8A8178" stroke-width="1.5"></ellipse>
+<ellipse cx="60" cy="126" rx="40" ry="11" fill="none" stroke="#B3262B" stroke-width="2" stroke-dasharray="3 5"></ellipse>
+<ellipse cx="60" cy="126" rx="26" ry="7" fill="#E4DDD2"></ellipse>
+<path d="M30 14 C 30 40, 44 52, 44 70 C 44 90, 34 100, 36 122 L 84 122 C 86 100, 76 90, 76 70 C 76 52, 90 40, 90 14 Z" fill="#E8EEF0" fill-opacity="0.45" stroke="#3A3A3A" stroke-width="2"></path>
+<path d="M33 34 C 37 48, 46 56, 46 70 C 46 90, 37 100, 39 119 L 81 119 C 83 100, 74 90, 74 70 C 74 56, 83 48, 87 34 Z" fill="#7A2E0E" fill-opacity="0.85"></path>
+<path d="M33 34 Q 60 40 87 34" stroke="#A8501E" stroke-width="2" fill="none"></path>
+<ellipse cx="60" cy="14" rx="30" ry="6" fill="#DDE6E8" fill-opacity="0.6" stroke="#3A3A3A" stroke-width="2"></ellipse>
+<path d="M40 40 C 44 52, 50 60, 50 74" stroke="#FFFFFF" stroke-width="3" opacity="0.45" fill="none" stroke-linecap="round"></path>
+</g></svg></div>
+  </section>
 
   <section id="viewListen" aria-label="Listen">
     <div class="toolbar" id="toolbar" role="search">
@@ -318,11 +384,26 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </nav></div>
 
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlgwrap"><div class="dlg" id="dlgBody"></div></div></dialog>
+<dialog id="famDlg" aria-labelledby="famTitle"><div class="dlgwrap"><div class="dlg" id="famBody">
+  <svg class="dlgrug" aria-hidden="true"><rect width="100%" height="100%" fill="url(#g-brd2)"/><rect x="8" width="46" height="100%" fill="#E6D5B5"/><rect x="11" width="40" height="100%" fill="url(#g-rugA)"/></svg>
+  <button type="button" class="close" id="famClose" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">FAMILY ACCESS</p>
+  <h2 id="famTitle">Who can come in</h2>
+  <p style="margin:6px 0 0">Viewers can listen and browse. Editors can also import, edit and delete, and manage this list.</p>
+  <ul class="famlist" id="famList"></ul>
+  <form class="famadd" id="famAdd" novalidate>
+    <div class="field"><label for="famEmail">Add someone by email</label><input id="famEmail" type="email" placeholder="cousin@example.com" autocomplete="off"></div>
+    <div class="field" style="flex:0 0 140px"><label for="famRole">Role</label><select id="famRole"><option value="viewer">Viewer</option><option value="editor">Editor</option></select></div>
+    <button type="submit" class="btn primary">Add</button>
+  </form>
+  <p class="hand" style="font-size:20px;margin:12px 0 0">once they're on the list, they sign in with that email</p>
+</div></div></dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
 "use strict";
 /* ============ constants ============ */
-const MAX_BYTES = 20 * 1024 * 1024;
+let MAX_BYTES = 20 * 1024 * 1024;
+const tooLargeMsg = () => "too large (over " + Math.round(MAX_BYTES / 1048576) + " MB)";
 const TYPES = [
   ["dobaiti","Dobaiti · دوبیتی"],["song","Song"],["story","Story"],["lullaby","Lullaby · لالایی"],
   ["proverb","Proverb · متل"],["prayer","Prayer / dua"],["memory","Memory / conversation"],["other","Other"]];
@@ -354,7 +435,7 @@ function initials(name){ const parts = (name||"").trim().split(/\s+/).filter(w =
 function avColor(name){ let h = 0; for (const c of (name||"")) h = (h*31 + c.codePointAt(0)) >>> 0; return AV_COLORS[h % AV_COLORS.length]; }
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 3200); }
 async function sha(s){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].slice(0,16).map(x=>x.toString(16).padStart(2,"0")).join(""); }
-function srcFor(it){ return it.preview ? S.blobUrls.get(it.id) : (it.assetId ? "/_blob/" + it.assetId : ""); }
+function srcFor(it){ if (it.preview) return S.blobUrls.get(it.id); if (!it.assetId) return ""; return S.backend === "supabase" ? (S.signed.get(it.assetId) || "") : "/_blob/" + it.assetId; }
 
 /* ============ theme ============ */
 (function(){
@@ -645,10 +726,10 @@ async function handleFiles(list){
         const realSize = size || blob0.size;
         const id = "i" + await sha(j.chat + "|" + name + "|" + realSize);
         if (S.items.has(id)){ dupes++; continue; }
-        if (realSize > MAX_BYTES && c.kind !== "voice"){ skipped.push([name, "too large (over 20 MB)"]); continue; }
+        if (realSize > MAX_BYTES && c.kind !== "voice"){ skipped.push([name, tooLargeMsg()]); continue; }
         setProgress(done - 1, jobs.length, kindWord(c.kind) + " " + done + " of " + jobs.length);
         const prepared = await prepare(blob0, name, c.kind, c.type);
-        if (prepared.blob.size > MAX_BYTES){ skipped.push([name, "too large (over 20 MB)"]); continue; }
+        if (prepared.blob.size > MAX_BYTES){ skipped.push([name, tooLargeMsg()]); continue; }
         const rec = {id, kind:c.kind, sender:j.sender || "", dateMs:j.dateMs || 0, chat:j.chat, filename:name, size:realSize, caption:j.caption || "",
           duration: prepared.duration != null ? Math.round(prepared.duration * 10) / 10 : null,
           title:"", type:"", words:"", translation:"", story:"", place:""};
@@ -658,7 +739,7 @@ async function handleFiles(list){
         logLine(kindWord(c.kind) + " from " + (rec.sender || "someone") + ", " + (rec.dateMs ? new Date(rec.dateMs).toLocaleDateString("en", {month:"short", day:"numeric", year:"numeric"}) : "date unknown"));
       } catch (e){
         const msg = e && e.code === "quota_or_state" ? "storage is full" : e && e.code === "quota_exceeded" ? "the archive's database is full" :
-          e && e.code === "too_large" ? "too large (over 20 MB)" : e && e.code === "unsupported_type" ? "storage doesn't accept this format" :
+          e && e.code === "too_large" ? tooLargeMsg() : e && e.code === "unsupported_type" ? "storage doesn't accept this format" :
           e && (e.code === "not_granted" || e.code === "invalid_argument") ? "you don't have permission to add items" : (e && e.message) || "couldn't be read";
         skipped.push([name, msg]);
       }
@@ -815,7 +896,7 @@ async function deleteItem(){
 
 /* ============ startup ============ */
 function setBanner(html){ $("#banner").innerHTML = html ? `<p class="banner">${html}</p>` : ""; }
-async function init(){
+async function initClaude(){
   if (!window.claude || typeof window.claude.use !== "function"){ startDemo(); return; }
   let db = null, assets = null, user = null;
   try { [db, assets, user] = await Promise.all([claude.use("db"), claude.use("assets"), claude.use("user")]); } catch(e){}
@@ -903,6 +984,8 @@ function startPreview(reason){
   render();
 }
 function route(){
+  if (S.gate){ $("#viewLogin").hidden = false; $("#viewListen").hidden = true; $("#viewAdd").hidden = true; document.querySelector(".tabwrap").hidden = true; return; }
+  $("#viewLogin").hidden = true; document.querySelector(".tabwrap").hidden = false;
   const add = location.hash === "#add";
   $("#viewAdd").hidden = !add; $("#viewListen").hidden = add;
   document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === (add ? "add" : "listen")) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
@@ -936,6 +1019,155 @@ async function runDemo(){
 }
 $("#demoBtn").addEventListener("click", runDemo);
 document.addEventListener("click", e => { if (e.target.closest("[data-demo]")){ e.preventDefault(); location.hash = "#add"; setTimeout(runDemo, 250); } });
+
+/* ===== Supabase: real family accounts ===== */
+S.signed = new Map(); S.backend = "claude"; S.gate = false;
+function supaErr(e, storage){
+  const m = String((e && (e.message || e.error)) || "").toLowerCase();
+  const code = /row-level security|permission|not allowed|unauthori[sz]ed|violates|403/.test(m) ? "invalid_argument"
+    : /exceed|too large|payload|413/.test(m) ? "too_large"
+    : storage && /mime|content type|invalid.*type/.test(m) ? "unsupported_type" : "unavailable";
+  return {code, message: (e && e.message) || "Something went wrong"};
+}
+function makeSupa(sb){
+  const db = {
+    _reload: null,
+    collection(){ return { onSnapshot(next, err){
+      let stopped = false, t = null;
+      const load = async () => {
+        const {data, error} = await sb.from("items").select("id,data");
+        if (stopped) return;
+        if (error){ if (err) err(supaErr(error)); return; }
+        next({docs: data.map(r => ({id:r.id, exists:true, data:() => r.data})), size:data.length, empty:!data.length, metadata:{fromCache:false, hasPendingWrites:false}});
+      };
+      db._reload = load; load();
+      let ch = null;
+      try { ch = sb.channel("items-live").on("postgres_changes", {event:"*", schema:"public", table:"items"}, () => { clearTimeout(t); t = setTimeout(load, 400); }).subscribe(); } catch(e){}
+      return () => { stopped = true; if (ch) sb.removeChannel(ch); };
+    }}; },
+    doc(path){ const id = path.split("/").pop(); return {
+      async set(d){ const {error} = await sb.from("items").upsert({id, data:d, updated_at:new Date().toISOString()}); if (error) throw supaErr(error); if (db._reload) db._reload(); },
+      async update(p){ const cur = {...(S.items.get(id) || {})}; delete cur.preview; delete cur.id;
+        const {error} = await sb.from("items").update({data:{...cur, ...p}, updated_at:new Date().toISOString()}).eq("id", id); if (error) throw supaErr(error); if (db._reload) db._reload(); },
+      async delete(){ const {error} = await sb.from("items").delete().eq("id", id); if (error) throw supaErr(error); if (db._reload) db._reload(); }
+    }; }
+  };
+  const assets = {
+    async upload(blob, opt){
+      const type = (opt && opt.type) || blob.type || "application/octet-stream";
+      const ext = /webm/.test(type) ? "webm" : /mp4/.test(type) ? "mp4" : (type.split("/")[1] || "bin").replace("jpeg", "jpg");
+      const path = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)) + "." + ext;
+      const {error} = await sb.storage.from("media").upload(path, blob, {contentType:type, upsert:false});
+      if (error) throw supaErr(error, true);
+      const {data} = await sb.storage.from("media").createSignedUrl(path, 60 * 60 * 12);
+      if (data && data.signedUrl) S.signed.set(path, data.signedUrl);
+      return {id:path, url:(data && data.signedUrl) || "", contentType:type, sizeBytes:blob.size};
+    },
+    async delete(path){ const {error} = await sb.storage.from("media").remove([path]); if (error) throw supaErr(error, true); S.signed.delete(path); return {deleted:true}; }
+  };
+  return {db, assets};
+}
+async function ensureSigned(){
+  const need = [...new Set([...S.items.values()].filter(i => i.assetId && !i.preview && !S.signed.has(i.assetId)).map(i => i.assetId))];
+  for (let k = 0; k < need.length; k += 100){
+    const {data} = await S.sb.storage.from("media").createSignedUrls(need.slice(k, k + 100), 60 * 60 * 12);
+    (data || []).forEach(d => { if (d && d.signedUrl) S.signed.set(d.path, d.signedUrl); });
+  }
+}
+function loginPanel(which){ ["loginForm", "loginSent", "loginNotMember"].forEach(id => { $("#" + id).hidden = id !== which; }); }
+function loginError(msg){ const e = $("#loginErr"); e.textContent = msg || ""; e.hidden = !msg; }
+function showGate(which){ S.gate = true; $("#stats").hidden = true; loginPanel(which); route(); }
+async function initSupabase(cfg){
+  S.backend = "supabase"; MAX_BYTES = 50 * 1024 * 1024;
+  const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  S.sb = sb;
+  $("#loginF").addEventListener("submit", async e => {
+    e.preventDefault(); loginError("");
+    const email = $("#loginEmail").value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ loginError("Please type a full email address, like name@example.com."); return; }
+    const btn = $("#loginBtn"); btn.disabled = true; btn.textContent = "Sending…";
+    const {error} = await sb.auth.signInWithOtp({email, options:{emailRedirectTo: location.origin + location.pathname}});
+    btn.disabled = false; btn.textContent = "Email me a sign-in link";
+    if (error){ loginError(/rate|seconds|too many/i.test(error.message) ? "Too many sign-in emails were sent just now. Wait a few minutes and try again." : "The sign-in email couldn't be sent: " + error.message); return; }
+    $("#sentTo").textContent = email; loginPanel("loginSent");
+  });
+  $("#loginAgain").onclick = () => loginPanel("loginForm");
+  const out = async () => { await sb.auth.signOut(); location.hash = ""; location.reload(); };
+  $("#nmOut").onclick = out; $("#signOutBtn").onclick = out;
+  $("#openDemo").onclick = () => { S.gate = false; S.backend = "demo"; $("#stats").hidden = false; MAX_BYTES = 20 * 1024 * 1024; startDemo(); route(); };
+
+  let session = null;
+  try { session = (await sb.auth.getSession()).data.session; } catch(e){}
+  sb.auth.onAuthStateChange((ev, s) => { if (ev === "SIGNED_IN" && !S.signedIn && s){ location.reload(); } });
+  if (!session){ showGate("loginForm"); return; }
+  S.signedIn = true;
+  if (/access_token|refresh_token|type=magiclink/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+  const email = (session.user && session.user.email) || "";
+  const {data:role, error:roleErr} = await sb.rpc("my_role");
+  if (roleErr){ showGate("loginForm"); loginError("The archive couldn't check your access. Has the setup script been run in Supabase? (" + roleErr.message + ")"); return; }
+  if (!role){ $("#nmEmail").textContent = email; showGate("loginNotMember"); return; }
+  S.role = role; S.canEdit = role === "editor"; S.storage = S.canEdit;
+  const {db, assets} = makeSupa(sb); S.db = db; S.assets = S.canEdit ? assets : null;
+  S.user = {id: async () => session.user.id};
+  $("#acct").hidden = false; $("#acctEmail").textContent = email; $("#famBtn").hidden = !S.canEdit;
+  $("#importer").hidden = !S.canEdit;
+  if (!S.canEdit) setBanner("You can browse and listen. Only editors can import, edit or delete.");
+  $("#impNote").textContent = "drop the whole chat export here, it's saved for the whole family";
+  route();
+  S.loadTimer = setTimeout(() => { if (!S.ready) $("#feed").innerHTML = '<p class="status">The archive can\'t be reached yet. It will appear here as soon as it loads.</p>'; }, 10000);
+  db.collection("items").onSnapshot(async snap => {
+    clearTimeout(S.loadTimer);
+    const keep = [...S.items.values()].filter(i => i.preview);
+    S.items = new Map(); for (const d of snap.docs){ const x = d.data(); if (x) S.items.set(d.id, {...x, id:d.id}); }
+    for (const p of keep) S.items.set(p.id, p);
+    S.ready = true;
+    try { await ensureSigned(); } catch(e){}
+    scheduleRender();
+  }, () => { clearTimeout(S.loadTimer); S.ready = true; $("#feed").innerHTML = '<p class="status">The archive couldn\'t be loaded right now. Try reloading in a moment.</p>'; });
+}
+/* family access (editors) */
+async function loadFamily(){
+  const {data, error} = await S.sb.from("members").select("email,role").order("email");
+  const ul = $("#famList");
+  if (error){ ul.innerHTML = '<li>Couldn\'t load the family list.</li>'; return; }
+  ul.innerHTML = data.map(m => `<li><span class="em">${esc(m.email)}</span>
+    <label class="sr" for="r-${esc(m.email)}">Role for ${esc(m.email)}</label>
+    <select id="r-${esc(m.email)}" data-role-for="${esc(m.email)}"><option value="viewer" ${m.role === "viewer" ? "selected" : ""}>Viewer</option><option value="editor" ${m.role === "editor" ? "selected" : ""}>Editor</option></select>
+    <button type="button" class="linkbtn" data-remove="${esc(m.email)}">Remove</button></li>`).join("") || "<li>No one yet.</li>";
+}
+$("#famBtn").addEventListener("click", async () => { $("#famDlg").showModal(); await loadFamily(); });
+$("#famClose").addEventListener("click", () => $("#famDlg").close());
+$("#famAdd").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = $("#famEmail").value.trim().toLowerCase(), role = $("#famRole").value;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ toast("Type a full email address."); return; }
+  const {error} = await S.sb.from("members").upsert({email, role});
+  if (error){ toast("Couldn't add them: " + error.message); return; }
+  $("#famEmail").value = ""; toast(email + " can now sign in"); loadFamily();
+});
+$("#famList").addEventListener("change", async e => {
+  const s = e.target.closest("[data-role-for]"); if (!s) return;
+  const {error} = await S.sb.from("members").update({role:s.value}).eq("email", s.dataset.roleFor);
+  toast(error ? "Couldn't change that role." : "Role updated");
+});
+$("#famList").addEventListener("click", async e => {
+  const b = e.target.closest("[data-remove]"); if (!b) return;
+  if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Click again to remove"; setTimeout(() => { if (b.isConnected){ b.classList.remove("armed"); b.textContent = "Remove"; } }, 4000); return; }
+  if (b.dataset.remove === ($("#acctEmail").textContent || "").toLowerCase()){ toast("You can't remove yourself."); return; }
+  const {error} = await S.sb.from("members").delete().eq("email", b.dataset.remove);
+  toast(error ? "Couldn't remove them." : "Removed"); loadFamily();
+});
+async function init(){
+  const cfg = window.FVA_CONFIG || {};
+  if (cfg.supabaseUrl && cfg.supabaseAnonKey){
+    if (window.supabase && window.supabase.createClient) return initSupabase(cfg);
+    S.gate = true; $("#stats").hidden = true; route(); loginPanel("loginForm");
+    loginError("The sign-in service didn't load. Check your internet connection and reload the page.");
+    $("#openDemo").onclick = () => { S.gate = false; startDemo(); route(); };
+    return;
+  }
+  return initClaude();
+}
 
 route();
 init();

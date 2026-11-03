@@ -47,6 +47,29 @@ The live archive is the Claude artifact, not this repo. **No recordings or photo
 
 If you open `index.html` anywhere else, such as GitHub Pages or a local file, there's no storage. The app runs in **Preview mode**: imports work so you can try them, but nothing is saved. Hosting it on its own would need its own storage backend, for example Firebase or Supabase.
 
+## Family sign-in (Supabase)
+
+The standalone site can have real family accounts. It uses [Supabase](https://supabase.com) (free tier) for sign-in, the database and private file storage.
+
+- **Signing in:** family sign in with an emailed link, so there's no password.
+- **Access:** only emails on the family list can open anything.
+  - **Viewers** can browse and listen.
+  - **Editors** can also import, edit, delete, and manage the list from **Family access**.
+- **Storage:** recordings and photos go in a private storage bucket. Each file is up to 50 MB.
+- **Demo:** the login page still has "Just looking? Open the demo" for presentations.
+
+### One-time setup (about 10 minutes)
+
+1. **Create a project.** Sign up at supabase.com and create a new project (any name, e.g. `family-voice-archive`). Pick a region near you and save the database password somewhere safe.
+2. **Run the setup script.** Open **SQL Editor → New query** and paste in everything from [`supabase/setup.sql`](supabase/setup.sql). Change `YOUR_EMAIL@example.com` on the last line to the email you'll sign in with, then click **Run**. This creates the family list (with you as the first editor), the items table, the private `media` storage bucket, and the security rules.
+3. **Set the sign-in addresses.** Go to **Authentication → URL Configuration** and set **Site URL** to `https://ninialbanini.github.io/familyArchive/`. Add the same address under **Redirect URLs**.
+4. **Copy your keys.** Under **Project Settings → API**, copy the **Project URL** and the **anon public** key into [`config.js`](config.js), then commit. Both are safe to publish, because the security rules in the setup script decide who can read or write.
+5. **Sign in.** Open the site and sign in with your email. Then use **Family access** to add relatives as viewers or editors. Each of them signs in with the email you added.
+
+Supabase's built-in email service only sends a few sign-in emails per hour. That's fine for a family. If it becomes a problem, connect your own email sender under **Authentication → Emails → SMTP Settings**.
+
+With `config.js` left empty, the site runs as the demo below.
+
 ## Demo for presentations
 
 Opened on its own (for example on GitHub Pages), the app runs as a **demo copy** that doesn't save. The Add page has a **Try it with a sample chat** button. It imports `demo/sample-chat.zip`, a small sample WhatsApp export, in front of the audience, so you don't need a real file on hand.
