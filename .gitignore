@@ -12,5 +12,3 @@ _chat.txt
 WhatsApp Chat*.txt
 .DS_Store
 
-# the demo sample chat is meant to be public
-!demo/sample-chat.zip

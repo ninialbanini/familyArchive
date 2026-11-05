@@ -56,7 +56,6 @@ The standalone site can have real family accounts. It uses [Supabase](https://su
   - **Viewers** can browse and listen.
   - **Editors** can also import, edit, delete, and manage the list from **Family access**.
 - **Storage:** recordings and photos go in a private storage bucket. Each file is up to 50 MB.
-- **Demo:** the login page still has "Just looking? Open the demo" for presentations.
 
 ### One-time setup (about 10 minutes)
 
@@ -68,13 +67,7 @@ The standalone site can have real family accounts. It uses [Supabase](https://su
 
 Supabase's built-in email service only sends a few sign-in emails per hour. That's fine for a family. If it becomes a problem, connect your own email sender under **Authentication → Emails → SMTP Settings**.
 
-With `config.js` left empty, the site runs as the demo below.
-
-## Demo for presentations
-
-Opened on its own (for example on GitHub Pages), the app runs as a **demo copy** that doesn't save. The Add page has a **Try it with a sample chat** button. It imports `demo/sample-chat.zip`, a small sample WhatsApp export, in front of the audience, so you don't need a real file on hand.
-
-The sample has 4 voice notes and 3 photos from senders marked "(sample)". The voice notes are short plucked melodies, not real family recordings, and the photos are drawn illustrations. To use real ones, replace `demo/sample-chat.zip` with an export your family is happy to have public. The repo is public, so anything in `demo/` can be seen by anyone.
+With `config.js` left empty, the login page says sign-in isn't set up yet.
 
 ## Privacy
 
