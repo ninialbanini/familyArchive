@@ -214,7 +214,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </defs></svg>
 <div class="page">
 <div class="sheetwrap"><div class="sheet">
-  <div class="topbar"><span class="acct" id="acct" hidden>Signed in as <b id="acctEmail"></b><button type="button" class="linkbtn" id="famBtn" hidden>Family access</button><button type="button" class="linkbtn" id="signOutBtn">Sign out</button></span><button class="pill" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span id="themeLabel">Dark</span></button></div>
+  <div class="topbar"><span class="acct" id="acct" hidden><b id="famNameTop"></b><label class="sr" for="famSwitch">Switch family</label><select id="famSwitch" hidden style="min-height:40px;border:1.5px solid var(--ink);border-radius:6px;background:var(--paper);padding:2px 6px"></select><span>· <span id="acctEmail"></span></span><button type="button" class="linkbtn" id="famBtn">Family settings</button><button type="button" class="linkbtn" id="signOutBtn">Sign out</button></span><button class="pill" id="themeBtn" type="button" aria-label="Switch light or dark theme"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span id="themeLabel">Dark</span></button></div>
   <div class="headwrap"><svg class="pclip" viewBox="0 0 30 80" aria-hidden="true"><path d="M20 22 V 66 a 8 8 0 0 1 -16 0 V 10 a 11 11 0 0 1 22 0 V 58" fill="none" stroke="#4A4A4A" stroke-width="2.6" stroke-linecap="round"></path></svg><div class="headcard">
     <span class="type" style="font-size:13px;color:#5A3A22">THE FAMILY'S OWN VOICES</span>
     <h1>Family Voice Archive</h1>
@@ -235,32 +235,39 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
           <h2 id="loginTitle">Come in, sit down.</h2>
           <p class="nast" lang="fa">خوش آمدید</p>
           <div id="loginForm">
-            <div class="seg" role="group" aria-label="How to sign in" id="loginWays" hidden style="display:inline-flex;margin:4px 0 12px">
-              <button type="button" data-way="pw" aria-pressed="true">Family password</button>
-              <button type="button" data-way="email" aria-pressed="false">My email</button>
-            </div>
-            <form id="pwF" novalidate hidden>
-              <div class="field"><label for="famPw">Family password</label><input id="famPw" type="password" autocomplete="current-password" required></div>
-              <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="pwBtn">Come in</button></p>
-              <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">the one the family shares, ask whoever keeps the archive</p>
-            </form>
-            <div id="emailWay">
             <form id="loginF" novalidate>
               <div class="field"><label for="loginEmail">Your email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div>
               <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="loginBtn">Email me a sign-in link</button></p>
             </form>
-            <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">no password to remember, the link in your email signs you in</p>
-            </div>
+            <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">new here? this makes your account, there's no password to remember</p>
           </div>
           <div id="loginSent" hidden>
             <p class="serif" style="font-size:26px;margin:0">Check your email.</p>
             <p style="margin:4px 0 0">We sent a sign-in link to <b id="sentTo"></b>. Open it on this device and you'll come straight back here.</p>
             <p style="margin:8px 0 0"><button type="button" class="linkbtn" id="loginAgain">Use a different email</button></p>
           </div>
-          <div id="loginNotMember" hidden>
-            <p style="margin:0">You're signed in as <b id="nmEmail"></b>, but that email isn't on the family list yet.</p>
-            <p class="hand" style="font-size:21px;margin:6px 0 0">ask whoever keeps the archive to add you under Family access</p>
-            <p style="margin:10px 0 0"><button type="button" class="btn ghost" id="nmOut">Sign out</button></p>
+          <div id="loginFamily" hidden>
+            <p style="margin:0 0 10px">Signed in as <b id="meEmail"></b>. Now find your family's archive.</p>
+            <div class="seg" role="group" aria-label="Join or start a family" style="display:inline-flex;margin:0 0 12px">
+              <button type="button" data-fam="join" aria-pressed="true">Join my family</button>
+              <button type="button" data-fam="start" aria-pressed="false">Start a new one</button>
+            </div>
+            <form id="joinF" novalidate>
+              <div class="field"><label for="jName">Family name</label><input id="jName" type="text" autocomplete="off" placeholder="e.g. Wafa Family"></div>
+              <div class="field" style="margin-top:8px"><label for="jPw">Family password</label><input id="jPw" type="password" autocomplete="off"></div>
+              <div class="field" style="margin-top:8px"><label for="jMe">Your name</label><input id="jMe" type="text" autocomplete="name" placeholder="so everyone knows who added what"></div>
+              <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="jBtn">Join</button></p>
+              <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">ask whoever started the archive for the family name and password</p>
+            </form>
+            <form id="startF" novalidate hidden>
+              <div class="field"><label for="sName">Family name</label><input id="sName" type="text" autocomplete="off" placeholder="e.g. Wafa Family"></div>
+              <div class="field" style="margin-top:8px"><label for="sPw">Choose a family password</label><input id="sPw" type="password" autocomplete="new-password" placeholder="at least 8 characters"></div>
+              <div class="field" style="margin-top:8px"><label for="sPw2">Type it again</label><input id="sPw2" type="password" autocomplete="new-password"></div>
+              <div class="field" style="margin-top:8px"><label for="sMe">Your name</label><input id="sMe" type="text" autocomplete="name"></div>
+              <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="sBtn">Start our archive</button></p>
+              <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">you'll be its keeper, share the name and password with your relatives</p>
+            </form>
+            <p style="margin:12px 0 0;display:flex;flex-wrap:wrap;gap:4px 14px"><button type="button" class="linkbtn" id="famBack" hidden>Back to my archive</button><button type="button" class="linkbtn" id="famOut">Sign out</button></p>
           </div>
           <p class="banner" id="loginErr" role="alert" hidden></p>
         </div>
@@ -388,29 +395,29 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </nav></div>
 
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlgwrap"><div class="dlg" id="dlgBody"></div></div></dialog>
-<dialog id="whoDlg" aria-labelledby="whoTitle"><div class="dlgwrap"><div class="dlg">
-  <svg class="dlgrug" aria-hidden="true"><rect width="100%" height="100%" fill="url(#g-brd2)"/><rect x="8" width="46" height="100%" fill="#E6D5B5"/><rect x="11" width="40" height="100%" fill="url(#g-rugA)"/></svg>
-  <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">FAMILY PASSWORD</p>
-  <h2 id="whoTitle">Who's here?</h2>
-  <p style="margin:6px 0 0">Everyone shares this login, so your name goes on what you add or change.</p>
-  <form id="whoF" novalidate style="margin-top:12px">
-    <div class="field"><label for="whoName">Your name</label><input id="whoName" type="text" autocomplete="name" placeholder="e.g. Maryam"></div>
-    <div class="dlgactions"><span></span><button type="submit" class="btn primary">Continue</button></div>
-  </form>
-</div></div></dialog>
 <dialog id="famDlg" aria-labelledby="famTitle"><div class="dlgwrap"><div class="dlg" id="famBody">
   <svg class="dlgrug" aria-hidden="true"><rect width="100%" height="100%" fill="url(#g-brd2)"/><rect x="8" width="46" height="100%" fill="#E6D5B5"/><rect x="11" width="40" height="100%" fill="url(#g-rugA)"/></svg>
   <button type="button" class="close" id="famClose" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">FAMILY ACCESS</p>
-  <h2 id="famTitle">Who can come in</h2>
-  <p style="margin:6px 0 0">Viewers can listen and browse. Editors can also import, edit and delete, and manage this list.</p>
+  <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">FAMILY SETTINGS</p>
+  <h2 id="famTitle"></h2>
+  <div class="field" style="margin-top:12px"><label for="myName">Your name in this family</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="myName" type="text" style="flex:1 1 200px"><button type="button" class="btn ghost" id="myNameSave">Save</button></div></div>
+  <h3 class="serif" style="font-size:22px;margin:18px 0 0">Who's in</h3>
   <ul class="famlist" id="famList"></ul>
-  <form class="famadd" id="famAdd" novalidate>
-    <div class="field"><label for="famEmail">Add someone by email</label><input id="famEmail" type="email" placeholder="cousin@example.com" autocomplete="off"></div>
-    <div class="field" style="flex:0 0 140px"><label for="famRole">Role</label><select id="famRole"><option value="viewer">Viewer</option><option value="editor">Editor</option></select></div>
-    <button type="submit" class="btn primary">Add</button>
-  </form>
-  <p class="hand" style="font-size:20px;margin:12px 0 0">once they're on the list, they sign in with that email</p>
+  <div id="keeperBox" hidden>
+    <h3 class="serif" style="font-size:22px;margin:18px 0 0">Invite relatives</h3>
+    <p style="margin:4px 0 0">Send them this, then tell them the family password yourself (by phone or in person, not in the same message).</p>
+    <textarea id="inviteText" readonly style="width:100%;min-height:84px;margin-top:8px;padding:10px;border:1.5px solid var(--ink);border-radius:6px;background:var(--paper)"></textarea>
+    <p style="margin:6px 0 0"><button type="button" class="btn ghost" id="copyInvite">Copy</button></p>
+    <h3 class="serif" style="font-size:22px;margin:18px 0 0">Change the family password</h3>
+    <form id="pwChange" class="famadd" novalidate>
+      <div class="field"><label for="newPw">New password</label><input id="newPw" type="password" autocomplete="new-password" placeholder="at least 8 characters"></div>
+      <div class="field"><label for="newPw2">Type it again</label><input id="newPw2" type="password" autocomplete="new-password"></div>
+      <button type="submit" class="btn primary">Change</button>
+    </form>
+    <p class="hand" style="font-size:20px;margin:8px 0 0">people already in stay in; the new password is for anyone joining next</p>
+  </div>
+  <div class="dlgactions"><button type="button" class="btn ghost" id="otherFam">Join or start another family</button><button type="button" class="btn danger" id="leaveFam">Leave this family</button></div>
 </div></div></dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -1012,7 +1019,7 @@ const _observeImporter = new MutationObserver(() => { $("#addLocked").hidden = !
 _observeImporter.observe($("#importer"), {attributes:true, attributeFilter:["hidden"]});
 
 
-/* ===== Supabase: real family accounts ===== */
+/* ===== Supabase: accounts and private families ===== */
 S.signed = new Map(); S.backend = "claude"; S.gate = false;
 function supaErr(e, storage){
   const m = String((e && (e.message || e.error)) || "").toLowerCase();
@@ -1021,34 +1028,35 @@ function supaErr(e, storage){
     : storage && /mime|content type|invalid.*type/.test(m) ? "unsupported_type" : "unavailable";
   return {code, message: (e && e.message) || "Something went wrong"};
 }
-function makeSupa(sb){
+function makeSupa(sb, fid){
+  const T = "archive_items";
   const db = {
     _reload: null,
     collection(){ return { onSnapshot(next, err){
       let stopped = false, t = null;
       const load = async () => {
-        const {data, error} = await sb.from("items").select("id,data");
+        const {data, error} = await sb.from(T).select("id,data").eq("family_id", fid);
         if (stopped) return;
         if (error){ if (err) err(supaErr(error)); return; }
         next({docs: data.map(r => ({id:r.id, exists:true, data:() => r.data})), size:data.length, empty:!data.length, metadata:{fromCache:false, hasPendingWrites:false}});
       };
       db._reload = load; load();
       let ch = null;
-      try { ch = sb.channel("items-live").on("postgres_changes", {event:"*", schema:"public", table:"items"}, () => { clearTimeout(t); t = setTimeout(load, 400); }).subscribe(); } catch(e){}
+      try { ch = sb.channel("items-" + fid).on("postgres_changes", {event:"*", schema:"public", table:T, filter:"family_id=eq." + fid}, () => { clearTimeout(t); t = setTimeout(load, 400); }).subscribe(); } catch(e){}
       return () => { stopped = true; if (ch) sb.removeChannel(ch); };
     }}; },
     doc(path){ const id = path.split("/").pop(); return {
-      async set(d){ const {error} = await sb.from("items").upsert({id, data:d, updated_at:new Date().toISOString()}); if (error) throw supaErr(error); if (db._reload) db._reload(); },
+      async set(d){ const {error} = await sb.from(T).upsert({family_id:fid, id, data:d, updated_at:new Date().toISOString()}, {onConflict:"family_id,id"}); if (error) throw supaErr(error); if (db._reload) db._reload(); },
       async update(p){ const cur = {...(S.items.get(id) || {})}; delete cur.preview; delete cur.id;
-        const {error} = await sb.from("items").update({data:{...cur, ...p}, updated_at:new Date().toISOString()}).eq("id", id); if (error) throw supaErr(error); if (db._reload) db._reload(); },
-      async delete(){ const {error} = await sb.from("items").delete().eq("id", id); if (error) throw supaErr(error); if (db._reload) db._reload(); }
+        const {error} = await sb.from(T).update({data:{...cur, ...p}, updated_at:new Date().toISOString()}).eq("family_id", fid).eq("id", id); if (error) throw supaErr(error); if (db._reload) db._reload(); },
+      async delete(){ const {error} = await sb.from(T).delete().eq("family_id", fid).eq("id", id); if (error) throw supaErr(error); if (db._reload) db._reload(); }
     }; }
   };
   const assets = {
     async upload(blob, opt){
       const type = (opt && opt.type) || blob.type || "application/octet-stream";
       const ext = /webm/.test(type) ? "webm" : /mp4/.test(type) ? "mp4" : (type.split("/")[1] || "bin").replace("jpeg", "jpg");
-      const path = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)) + "." + ext;
+      const path = fid + "/" + (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)) + "." + ext;
       const {error} = await sb.storage.from("media").upload(path, blob, {contentType:type, upsert:false});
       if (error) throw supaErr(error, true);
       const {data} = await sb.storage.from("media").createSignedUrl(path, 60 * 60 * 12);
@@ -1066,13 +1074,29 @@ async function ensureSigned(){
     (data || []).forEach(d => { if (d && d.signedUrl) S.signed.set(d.path, d.signedUrl); });
   }
 }
-function loginPanel(which){ ["loginForm", "loginSent", "loginNotMember"].forEach(id => { $("#" + id).hidden = id !== which; }); }
+function loginPanel(which){ ["loginForm", "loginSent", "loginFamily"].forEach(id => { $("#" + id).hidden = id !== which; }); }
 function loginError(msg){ const e = $("#loginErr"); e.textContent = msg || ""; e.hidden = !msg; }
 function showGate(which){ S.gate = true; $("#stats").hidden = true; loginPanel(which); route(); }
+function lastFamily(){ try { return localStorage.getItem("fva-family") || ""; } catch(e){ return ""; } }
+function rememberFamily(id){ try { localStorage.setItem("fva-family", id); } catch(e){} }
+function famErr(e){
+  const m = String((e && e.message) || "");
+  if (/taken/.test(m)) return "That family name is already used. Add something to make it yours, like a city or a grandparent's name.";
+  if (/password too short/.test(m)) return "The family password needs at least 8 characters.";
+  if (/name too short/.test(m)) return "Type a family name.";
+  if (/too many/.test(m)) return "Too many wrong tries. Wait 15 minutes and try again.";
+  if (/function .* does not exist|could not find the function|schema cache/i.test(m)) return "The archive isn't set up yet: run supabase/setup.sql in your Supabase project.";
+  return "Something went wrong: " + m;
+}
+
 async function initSupabase(cfg){
   S.backend = "supabase"; MAX_BYTES = 50 * 1024 * 1024;
   const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   S.sb = sb;
+  const out = async () => { await sb.auth.signOut(); try { localStorage.removeItem("fva-family"); } catch(e){} location.hash = ""; location.reload(); };
+  $("#famOut").onclick = out; $("#signOutBtn").onclick = out;
+
+  /* step 1: email account */
   $("#loginF").addEventListener("submit", async e => {
     e.preventDefault(); loginError("");
     const email = $("#loginEmail").value.trim().toLowerCase();
@@ -1084,25 +1108,34 @@ async function initSupabase(cfg){
     $("#sentTo").textContent = email; loginPanel("loginSent");
   });
   $("#loginAgain").onclick = () => loginPanel("loginForm");
-  const famEmail = (cfg.familyLoginEmail || "").trim().toLowerCase();
-  if (famEmail){
-    $("#loginWays").hidden = false;
-    const setWay = w => { document.querySelectorAll("[data-way]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.way === w)));
-      $("#pwF").hidden = w !== "pw"; $("#emailWay").hidden = w !== "email"; loginError(""); };
-    document.querySelectorAll("[data-way]").forEach(b => b.addEventListener("click", () => setWay(b.dataset.way)));
-    setWay("pw");
-    $("#pwF").addEventListener("submit", async e => {
-      e.preventDefault(); loginError("");
-      const pw = $("#famPw").value; if (!pw){ loginError("Type the family password."); return; }
-      const btn = $("#pwBtn"); btn.disabled = true; btn.textContent = "Opening…";
-      const {error} = await sb.auth.signInWithPassword({email:famEmail, password:pw});
-      btn.disabled = false; btn.textContent = "Come in";
-      if (error){ loginError(/invalid|credentials/i.test(error.message) ? "That password didn't work. Check it with whoever keeps the archive." : /rate|too many/i.test(error.message) ? "Too many tries just now. Wait a few minutes and try again." : "Couldn't sign in: " + error.message); return; }
-      location.reload();
-    });
-  }
-  const out = async () => { await sb.auth.signOut(); location.hash = ""; location.reload(); };
-  $("#nmOut").onclick = out; $("#signOutBtn").onclick = out;
+
+  /* step 2: join or start a family */
+  const setFam = w => { document.querySelectorAll("[data-fam]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.fam === w)));
+    $("#joinF").hidden = w !== "join"; $("#startF").hidden = w !== "start"; loginError(""); };
+  document.querySelectorAll("[data-fam]").forEach(b => b.addEventListener("click", () => setFam(b.dataset.fam)));
+  $("#joinF").addEventListener("submit", async e => {
+    e.preventDefault(); loginError("");
+    const name = $("#jName").value.trim(), pw = $("#jPw").value, me = $("#jMe").value.trim();
+    if (!name || !pw){ loginError("Type the family name and the family password."); return; }
+    const btn = $("#jBtn"); btn.disabled = true; btn.textContent = "Checking…";
+    const {data, error} = await sb.rpc("join_family", {p_name:name, p_password:pw, p_display_name:me});
+    btn.disabled = false; btn.textContent = "Join";
+    if (error){ loginError(famErr(error)); return; }
+    if (!data){ loginError("That family name and password don't match. Check them with whoever started the archive."); return; }
+    rememberFamily(data); location.hash = ""; location.reload();
+  });
+  $("#startF").addEventListener("submit", async e => {
+    e.preventDefault(); loginError("");
+    const name = $("#sName").value.trim(), pw = $("#sPw").value, pw2 = $("#sPw2").value, me = $("#sMe").value.trim();
+    if (name.length < 2){ loginError("Type a family name."); return; }
+    if (pw.length < 8){ loginError("The family password needs at least 8 characters."); return; }
+    if (pw !== pw2){ loginError("The two passwords don't match."); return; }
+    const btn = $("#sBtn"); btn.disabled = true; btn.textContent = "Starting…";
+    const {data, error} = await sb.rpc("create_family", {p_name:name, p_password:pw, p_display_name:me});
+    btn.disabled = false; btn.textContent = "Start our archive";
+    if (error){ loginError(famErr(error)); return; }
+    rememberFamily(data); location.hash = ""; location.reload();
+  });
 
   let session = null;
   try { session = (await sb.auth.getSession()).data.session; } catch(e){}
@@ -1110,28 +1143,31 @@ async function initSupabase(cfg){
   if (!session){ showGate("loginForm"); return; }
   S.signedIn = true;
   if (/access_token|refresh_token|type=magiclink/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
-  const email = (session.user && session.user.email) || "";
-  const {data:role, error:roleErr} = await sb.rpc("my_role");
-  if (roleErr){ showGate("loginForm"); loginError("The archive couldn't check your access. Has the setup script been run in Supabase? (" + roleErr.message + ")"); return; }
-  if (!role){ $("#nmEmail").textContent = email; showGate("loginNotMember"); return; }
-  S.role = role; S.canEdit = role === "editor" || role === "family"; S.storage = S.canEdit;
-  S.shared = !!famEmail && email.toLowerCase() === famEmail;
-  const {db, assets} = makeSupa(sb); S.db = db; S.assets = S.canEdit ? assets : null;
-  S.user = {id: async () => session.user.id};
-  $("#acct").hidden = false; $("#famBtn").hidden = role !== "editor";
-  if (S.shared){
-    let nm = ""; try { nm = localStorage.getItem("fva-name") || ""; } catch(e){}
-    const showName = () => { $("#acctEmail").textContent = (S.myName ? S.myName + " (family password)" : "the family password"); if (S.myName && !$("#sharedBy").value) $("#sharedBy").value = S.myName; };
-    S.myName = nm; showName();
-    $("#acctEmail").insertAdjacentHTML("afterend", ' <button type="button" class="linkbtn" id="changeName">Not you?</button>');
-    const ask = () => { $("#whoName").value = S.myName || ""; $("#whoDlg").showModal(); setTimeout(() => $("#whoName").focus(), 50); };
-    $("#whoF").addEventListener("submit", e => { e.preventDefault(); S.myName = $("#whoName").value.trim(); try { localStorage.setItem("fva-name", S.myName); } catch(_){} $("#sharedBy").value = S.myName; showName(); $("#whoDlg").close(); });
-    $("#changeName").onclick = ask;
-    if (!nm) ask();
-  } else { $("#acctEmail").textContent = email; S.myName = ""; }
-  $("#importer").hidden = !S.canEdit;
-  if (!S.canEdit) setBanner("You can browse and listen. Only editors can import, edit or delete.");
-  $("#impNote").textContent = "drop the whole chat export here, it's saved for the whole family";
+  const email = (session.user && session.user.email) || "", uid = session.user.id;
+  $("#meEmail").textContent = email;
+
+  const {data:mine, error:famErrQ} = await sb.from("family_members").select("family_id,role,display_name,families(name)").eq("user_id", uid);
+  if (famErrQ){ showGate("loginFamily"); loginError(famErr(famErrQ)); return; }
+  const fams = (mine || []).map(r => ({id:r.family_id, role:r.role, me:r.display_name || "", name:(r.families && r.families.name) || "Our family"}));
+  if (!fams.length){ showGate("loginFamily"); return; }
+  const fam = fams.find(f => f.id === lastFamily()) || fams[0];
+  rememberFamily(fam.id);
+  S.family = fam; S.role = fam.role; S.canEdit = true; S.storage = true; S.myName = fam.me;
+
+  /* in the archive */
+  const {db, assets} = makeSupa(sb, fam.id); S.db = db; S.assets = assets;
+  S.user = {id: async () => uid};
+  $("#acct").hidden = false; $("#acctEmail").textContent = fam.me ? fam.me : email;
+  $("#famNameTop").textContent = fam.name; $("#famNameTop").hidden = fams.length > 1;
+  if (fams.length > 1){
+    const sel = $("#famSwitch"); sel.hidden = false;
+    sel.innerHTML = fams.map(f => `<option value="${esc(f.id)}" ${f.id === fam.id ? "selected" : ""}>${esc(f.name)}</option>`).join("");
+    sel.onchange = () => { rememberFamily(sel.value); location.reload(); };
+  }
+  if (fam.me) $("#sharedBy").value = fam.me;
+  $("#importer").hidden = false;
+  $("#impNote").textContent = "drop the whole chat export here, it's saved for everyone in " + fam.name;
+  document.title = fam.name + " · Family Voice Archive";
   route();
   S.loadTimer = setTimeout(() => { if (!S.ready) $("#feed").innerHTML = '<p class="status">The archive can\'t be reached yet. It will appear here as soon as it loads.</p>'; }, 10000);
   db.collection("items").onSnapshot(async snap => {
@@ -1143,38 +1179,76 @@ async function initSupabase(cfg){
     try { await ensureSigned(); } catch(e){}
     scheduleRender();
   }, () => { clearTimeout(S.loadTimer); S.ready = true; $("#feed").innerHTML = '<p class="status">The archive couldn\'t be loaded right now. Try reloading in a moment.</p>'; });
+
+  /* "join or start another" from inside the archive */
+  $("#otherFam").onclick = () => { $("#famDlg").close(); $("#famBack").hidden = false; showGate("loginFamily"); };
+  $("#famBack").onclick = () => { S.gate = false; $("#stats").hidden = false; loginError(""); route(); };
 }
-/* family access (editors) */
+
+/* family settings */
 async function loadFamily(){
-  const {data, error} = await S.sb.from("members").select("email,role").order("email");
+  const f = S.family; if (!f) return;
+  $("#famTitle").textContent = f.name;
+  $("#myName").value = S.myName || "";
+  $("#keeperBox").hidden = f.role !== "keeper";
+  $("#inviteText").value = "Join our family's voice archive: " + location.origin + location.pathname +
+    "\nSign in with your email, choose “Join my family” and type the family name: " + f.name +
+    "\nI'll tell you the family password separately.";
+  const {data, error} = await S.sb.from("family_members").select("user_id,email,display_name,role").eq("family_id", f.id).order("joined_at");
   const ul = $("#famList");
-  if (error){ ul.innerHTML = '<li>Couldn\'t load the family list.</li>'; return; }
-  ul.innerHTML = data.map(m => m.role === "family" ? `<li><span class="em">Family password login</span><span style="color:var(--muted);font-size:15px">can listen, upload and edit</span></li>` : `<li><span class="em">${esc(m.email)}</span>
-    <label class="sr" for="r-${esc(m.email)}">Role for ${esc(m.email)}</label>
-    <select id="r-${esc(m.email)}" data-role-for="${esc(m.email)}"><option value="viewer" ${m.role === "viewer" ? "selected" : ""}>Viewer</option><option value="editor" ${m.role === "editor" ? "selected" : ""}>Editor</option></select>
-    <button type="button" class="linkbtn" data-remove="${esc(m.email)}">Remove</button></li>`).join("") || "<li>No one yet.</li>";
+  if (error){ ul.innerHTML = "<li>Couldn't load the family list.</li>"; return; }
+  const me = (await S.user.id());
+  const keeper = f.role === "keeper";
+  ul.innerHTML = data.map(m => `<li><span class="em">${esc(m.display_name || m.email || "Someone")}${m.user_id === me ? " (you)" : ""}<br><span style="font-weight:400;font-size:14px;color:var(--muted)">${esc(m.email || "")}</span></span>
+    ${keeper && m.user_id !== me ? `<label class="sr" for="r-${esc(m.user_id)}">Role</label><select id="r-${esc(m.user_id)}" data-role-for="${esc(m.user_id)}"><option value="member" ${m.role === "member" ? "selected" : ""}>Member</option><option value="keeper" ${m.role === "keeper" ? "selected" : ""}>Keeper</option></select>
+      <button type="button" class="linkbtn" data-remove="${esc(m.user_id)}">Remove</button>` : `<span class="chip">${m.role === "keeper" ? "Keeper" : "Member"}</span>`}</li>`).join("");
 }
 $("#famBtn").addEventListener("click", async () => { $("#famDlg").showModal(); await loadFamily(); });
 $("#famClose").addEventListener("click", () => $("#famDlg").close());
-$("#famAdd").addEventListener("submit", async e => {
+$("#myNameSave").addEventListener("click", async () => {
+  const n = $("#myName").value.trim();
+  const {error} = await S.sb.rpc("set_my_name", {p_family:S.family.id, p_name:n});
+  if (error){ toast("Couldn't save your name."); return; }
+  S.myName = n; $("#acctEmail").textContent = n || ($("#meEmail").textContent || ""); if (n) $("#sharedBy").value = n;
+  toast("Saved"); loadFamily();
+});
+$("#copyInvite").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("#inviteText").value); toast("Copied"); }
+  catch(e){ $("#inviteText").select(); toast("Select the text and copy it"); }
+});
+$("#pwChange").addEventListener("submit", async e => {
   e.preventDefault();
-  const email = $("#famEmail").value.trim().toLowerCase(), role = $("#famRole").value;
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ toast("Type a full email address."); return; }
-  const {error} = await S.sb.from("members").upsert({email, role});
-  if (error){ toast("Couldn't add them: " + error.message); return; }
-  $("#famEmail").value = ""; toast(email + " can now sign in"); loadFamily();
+  const a = $("#newPw").value, b = $("#newPw2").value;
+  if (a.length < 8){ toast("The family password needs at least 8 characters."); return; }
+  if (a !== b){ toast("The two passwords don't match."); return; }
+  const {error} = await S.sb.rpc("set_family_password", {p_family:S.family.id, p_password:a});
+  if (error){ toast(famErr(error)); return; }
+  $("#newPw").value = ""; $("#newPw2").value = ""; toast("Family password changed");
 });
 $("#famList").addEventListener("change", async e => {
   const s = e.target.closest("[data-role-for]"); if (!s) return;
-  const {error} = await S.sb.from("members").update({role:s.value}).eq("email", s.dataset.roleFor);
-  toast(error ? "Couldn't change that role." : "Role updated");
+  const {error} = await S.sb.from("family_members").update({role:s.value}).eq("family_id", S.family.id).eq("user_id", s.dataset.roleFor);
+  toast(error ? "Couldn't change that." : "Updated");
 });
 $("#famList").addEventListener("click", async e => {
   const b = e.target.closest("[data-remove]"); if (!b) return;
   if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Click again to remove"; setTimeout(() => { if (b.isConnected){ b.classList.remove("armed"); b.textContent = "Remove"; } }, 4000); return; }
-  if (b.dataset.remove === ($("#acctEmail").textContent || "").toLowerCase()){ toast("You can't remove yourself."); return; }
-  const {error} = await S.sb.from("members").delete().eq("email", b.dataset.remove);
-  toast(error ? "Couldn't remove them." : "Removed"); loadFamily();
+  const {error} = await S.sb.from("family_members").delete().eq("family_id", S.family.id).eq("user_id", b.dataset.remove);
+  toast(error ? "Couldn't remove them." : "Removed. Change the family password so they can't rejoin."); loadFamily();
+});
+$("#leaveFam").addEventListener("click", async () => {
+  const b = $("#leaveFam");
+  if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Click again to leave"; setTimeout(() => { if (b.isConnected){ b.classList.remove("armed"); b.textContent = "Leave this family"; } }, 4000); return; }
+  if (S.family.role === "keeper"){
+    const {data} = await S.sb.from("family_members").select("user_id,role").eq("family_id", S.family.id);
+    if ((data || []).filter(m => m.role === "keeper").length <= 1){
+      toast("Make someone else a keeper first, so the family isn't left without one."); b.classList.remove("armed"); b.textContent = "Leave this family"; return; }
+  }
+  const uid = await S.user.id();
+  const {error} = await S.sb.from("family_members").delete().eq("family_id", S.family.id).eq("user_id", uid);
+  if (error){ toast("Couldn't leave right now."); return; }
+  try { localStorage.removeItem("fva-family"); } catch(e){}
+  location.hash = ""; location.reload();
 });
 async function init(){
   const cfg = window.FVA_CONFIG || {};
