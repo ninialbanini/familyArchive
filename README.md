@@ -65,6 +65,16 @@ The standalone site can have real family accounts. It uses [Supabase](https://su
 4. **Copy your keys.** Under **Project Settings → API**, copy the **Project URL** and the **anon public** key into [`config.js`](config.js), then commit. Both are safe to publish, because the security rules in the setup script decide who can read or write.
 5. **Sign in.** Open the site and sign in with your email. Then use **Family access** to add relatives as viewers or editors. Each of them signs in with the email you added.
 
+### Family password (optional)
+
+Besides individual email sign-in, the login page offers a **Family password** that everyone in the family shares. It can listen, upload and edit, but it can't manage the family list. After signing in, people type their name, and uploads and edits are labelled with it.
+
+1. In Supabase, go to **Authentication → Users → Add user → Create new user**. Use the email `family.archive@example.com` (the `familyLoginEmail` in `config.js`) and choose the family password. Tick **Auto Confirm User**.
+2. In **SQL Editor**, run [`supabase/family-login.sql`](supabase/family-login.sql). This adds the "family" role and puts that login on the family list. New projects get this from `setup.sql` already.
+3. To change the family password later, open that user under **Authentication → Users** and set a new password. Everyone already signed in stays signed in, so to lock someone out, also sign out all sessions for that user.
+
+The password is checked by Supabase, not by the page, so it can't be got around by reading the code. Anyone who knows it can upload and delete, though, so share it only with family.
+
 Supabase's built-in email service only sends a few sign-in emails per hour. That's fine for a family. If it becomes a problem, connect your own email sender under **Authentication → Emails → SMTP Settings**.
 
 With `config.js` left empty, the login page says sign-in isn't set up yet.

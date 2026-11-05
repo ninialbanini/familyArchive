@@ -235,11 +235,22 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
           <h2 id="loginTitle">Come in, sit down.</h2>
           <p class="nast" lang="fa">خوش آمدید</p>
           <div id="loginForm">
+            <div class="seg" role="group" aria-label="How to sign in" id="loginWays" hidden style="display:inline-flex;margin:4px 0 12px">
+              <button type="button" data-way="pw" aria-pressed="true">Family password</button>
+              <button type="button" data-way="email" aria-pressed="false">My email</button>
+            </div>
+            <form id="pwF" novalidate hidden>
+              <div class="field"><label for="famPw">Family password</label><input id="famPw" type="password" autocomplete="current-password" required></div>
+              <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="pwBtn">Come in</button></p>
+              <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">the one the family shares, ask whoever keeps the archive</p>
+            </form>
+            <div id="emailWay">
             <form id="loginF" novalidate>
               <div class="field"><label for="loginEmail">Your email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div>
               <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="loginBtn">Email me a sign-in link</button></p>
             </form>
             <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">no password to remember, the link in your email signs you in</p>
+            </div>
           </div>
           <div id="loginSent" hidden>
             <p class="serif" style="font-size:26px;margin:0">Check your email.</p>
@@ -377,6 +388,16 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </nav></div>
 
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlgwrap"><div class="dlg" id="dlgBody"></div></div></dialog>
+<dialog id="whoDlg" aria-labelledby="whoTitle"><div class="dlgwrap"><div class="dlg">
+  <svg class="dlgrug" aria-hidden="true"><rect width="100%" height="100%" fill="url(#g-brd2)"/><rect x="8" width="46" height="100%" fill="#E6D5B5"/><rect x="11" width="40" height="100%" fill="url(#g-rugA)"/></svg>
+  <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">FAMILY PASSWORD</p>
+  <h2 id="whoTitle">Who's here?</h2>
+  <p style="margin:6px 0 0">Everyone shares this login, so your name goes on what you add or change.</p>
+  <form id="whoF" novalidate style="margin-top:12px">
+    <div class="field"><label for="whoName">Your name</label><input id="whoName" type="text" autocomplete="name" placeholder="e.g. Maryam"></div>
+    <div class="dlgactions"><span></span><button type="submit" class="btn primary">Continue</button></div>
+  </form>
+</div></div></dialog>
 <dialog id="famDlg" aria-labelledby="famTitle"><div class="dlgwrap"><div class="dlg" id="famBody">
   <svg class="dlgrug" aria-hidden="true"><rect width="100%" height="100%" fill="url(#g-brd2)"/><rect x="8" width="46" height="100%" fill="#E6D5B5"/><rect x="11" width="40" height="100%" fill="url(#g-rugA)"/></svg>
   <button type="button" class="close" id="famClose" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -667,6 +688,7 @@ async function saveNew(rec, prepared){
   const up = await uploadAsset(prepared.blob, prepared.type);
   const doc = {...rec, assetId:up.id, mime:up.contentType, storedBytes:up.sizeBytes, createdAt:Date.now()};
   try { if (S.user && typeof S.user.id === "function"){ const uid = await S.user.id(); if (uid) doc.importedBy = uid; } } catch(e){}
+  if (S.myName) doc.importedByName = S.myName;
   try { await S.db.doc("items/" + rec.id).set(doc); }
   catch (e){ try { await S.assets.delete(up.id); } catch(_){} throw e; }
 }
@@ -847,7 +869,7 @@ function openDetail(id){
       ${it.caption ? `<div class="field full"><span style="font-weight:600;font-size:15px">Caption from WhatsApp</span><p class="caption" style="margin:0">${esc(it.caption)}</p></div>` : ""}</div>`;
   }
   $("#dlgBody").innerHTML = `<svg class="dlgrug" aria-hidden="true"><rect width="100%" height="100%" fill="url(#g-brd2)"/><rect x="8" width="46" height="100%" fill="#E6D5B5"/><rect x="11" width="40" height="100%" fill="url(#g-rugA)"/></svg><button type="button" class="close" id="dlgClose" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">${esc(kindWord(it.kind).toUpperCase())} · ${esc(it.chat || "")}${it.preview ? " · PREVIEW, NOT SAVED" : ""}</p>
+    <p class="type" style="margin:0 0 4px;font-size:13px;color:var(--muted)">${esc(kindWord(it.kind).toUpperCase())} · ${esc(it.chat || "")}${it.importedByName ? " · ADDED BY " + esc(it.importedByName.toUpperCase()) : ""}${it.preview ? " · PREVIEW, NOT SAVED" : ""}</p>
     <h2 id="dlgTitle">${esc(it.title || (it.kind === "voice" ? "Untitled voice note" : kindWord(it.kind)))}</h2>
     <div class="media" style="margin-top:12px">${media}</div>${form}
     <div class="dlgactions">${edit ? `<button type="button" class="btn danger" id="dDelete">Delete</button><span style="flex:1"></span><button type="button" class="btn ghost" id="dCancel">Cancel</button><button type="button" class="btn primary" id="dSave">Save</button>`
@@ -873,7 +895,7 @@ async function saveDetail(){
   const btn = $("#dSave"); btn.disabled = true; btn.textContent = "Saving…";
   try {
     if (it.preview){ S.items.set(it.id, {...it, ...patch}); }
-    else { patch.updatedAt = Date.now(); await S.db.doc("items/" + it.id).update(patch); }
+    else { patch.updatedAt = Date.now(); if (S.myName) patch.editedByName = S.myName; await S.db.doc("items/" + it.id).update(patch); }
     closeDetail(); toast(it.preview ? "Updated (preview only, not saved)" : "Saved"); scheduleRender();
   } catch (e){ btn.disabled = false; btn.textContent = "Save"; toast(e && e.code === "invalid_argument" ? "You don't have permission to edit this archive." : "Couldn't save. Try again in a moment."); }
 }
@@ -1062,6 +1084,23 @@ async function initSupabase(cfg){
     $("#sentTo").textContent = email; loginPanel("loginSent");
   });
   $("#loginAgain").onclick = () => loginPanel("loginForm");
+  const famEmail = (cfg.familyLoginEmail || "").trim().toLowerCase();
+  if (famEmail){
+    $("#loginWays").hidden = false;
+    const setWay = w => { document.querySelectorAll("[data-way]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.way === w)));
+      $("#pwF").hidden = w !== "pw"; $("#emailWay").hidden = w !== "email"; loginError(""); };
+    document.querySelectorAll("[data-way]").forEach(b => b.addEventListener("click", () => setWay(b.dataset.way)));
+    setWay("pw");
+    $("#pwF").addEventListener("submit", async e => {
+      e.preventDefault(); loginError("");
+      const pw = $("#famPw").value; if (!pw){ loginError("Type the family password."); return; }
+      const btn = $("#pwBtn"); btn.disabled = true; btn.textContent = "Opening…";
+      const {error} = await sb.auth.signInWithPassword({email:famEmail, password:pw});
+      btn.disabled = false; btn.textContent = "Come in";
+      if (error){ loginError(/invalid|credentials/i.test(error.message) ? "That password didn't work. Check it with whoever keeps the archive." : /rate|too many/i.test(error.message) ? "Too many tries just now. Wait a few minutes and try again." : "Couldn't sign in: " + error.message); return; }
+      location.reload();
+    });
+  }
   const out = async () => { await sb.auth.signOut(); location.hash = ""; location.reload(); };
   $("#nmOut").onclick = out; $("#signOutBtn").onclick = out;
 
@@ -1075,10 +1114,21 @@ async function initSupabase(cfg){
   const {data:role, error:roleErr} = await sb.rpc("my_role");
   if (roleErr){ showGate("loginForm"); loginError("The archive couldn't check your access. Has the setup script been run in Supabase? (" + roleErr.message + ")"); return; }
   if (!role){ $("#nmEmail").textContent = email; showGate("loginNotMember"); return; }
-  S.role = role; S.canEdit = role === "editor"; S.storage = S.canEdit;
+  S.role = role; S.canEdit = role === "editor" || role === "family"; S.storage = S.canEdit;
+  S.shared = !!famEmail && email.toLowerCase() === famEmail;
   const {db, assets} = makeSupa(sb); S.db = db; S.assets = S.canEdit ? assets : null;
   S.user = {id: async () => session.user.id};
-  $("#acct").hidden = false; $("#acctEmail").textContent = email; $("#famBtn").hidden = !S.canEdit;
+  $("#acct").hidden = false; $("#famBtn").hidden = role !== "editor";
+  if (S.shared){
+    let nm = ""; try { nm = localStorage.getItem("fva-name") || ""; } catch(e){}
+    const showName = () => { $("#acctEmail").textContent = (S.myName ? S.myName + " (family password)" : "the family password"); if (S.myName && !$("#sharedBy").value) $("#sharedBy").value = S.myName; };
+    S.myName = nm; showName();
+    $("#acctEmail").insertAdjacentHTML("afterend", ' <button type="button" class="linkbtn" id="changeName">Not you?</button>');
+    const ask = () => { $("#whoName").value = S.myName || ""; $("#whoDlg").showModal(); setTimeout(() => $("#whoName").focus(), 50); };
+    $("#whoF").addEventListener("submit", e => { e.preventDefault(); S.myName = $("#whoName").value.trim(); try { localStorage.setItem("fva-name", S.myName); } catch(_){} $("#sharedBy").value = S.myName; showName(); $("#whoDlg").close(); });
+    $("#changeName").onclick = ask;
+    if (!nm) ask();
+  } else { $("#acctEmail").textContent = email; S.myName = ""; }
   $("#importer").hidden = !S.canEdit;
   if (!S.canEdit) setBanner("You can browse and listen. Only editors can import, edit or delete.");
   $("#impNote").textContent = "drop the whole chat export here, it's saved for the whole family";
@@ -1099,7 +1149,7 @@ async function loadFamily(){
   const {data, error} = await S.sb.from("members").select("email,role").order("email");
   const ul = $("#famList");
   if (error){ ul.innerHTML = '<li>Couldn\'t load the family list.</li>'; return; }
-  ul.innerHTML = data.map(m => `<li><span class="em">${esc(m.email)}</span>
+  ul.innerHTML = data.map(m => m.role === "family" ? `<li><span class="em">Family password login</span><span style="color:var(--muted);font-size:15px">can listen, upload and edit</span></li>` : `<li><span class="em">${esc(m.email)}</span>
     <label class="sr" for="r-${esc(m.email)}">Role for ${esc(m.email)}</label>
     <select id="r-${esc(m.email)}" data-role-for="${esc(m.email)}"><option value="viewer" ${m.role === "viewer" ? "selected" : ""}>Viewer</option><option value="editor" ${m.role === "editor" ? "selected" : ""}>Editor</option></select>
     <button type="button" class="linkbtn" data-remove="${esc(m.email)}">Remove</button></li>`).join("") || "<li>No one yet.</li>";
