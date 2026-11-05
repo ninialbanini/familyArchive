@@ -1094,7 +1094,7 @@ async function initSupabase(cfg){
   $("#loginAgain").onclick = () => loginPanel("loginForm");
   const out = async () => { await sb.auth.signOut(); location.hash = ""; location.reload(); };
   $("#nmOut").onclick = out; $("#signOutBtn").onclick = out;
-  $("#openDemo").onclick = () => { S.gate = false; S.backend = "demo"; $("#stats").hidden = false; MAX_BYTES = 20 * 1024 * 1024; startDemo(); route(); };
+  $("#openDemo").onclick = () => { S.gate = false; S.backend = "demo"; $("#stats").hidden = false; MAX_BYTES = 20 * 1024 * 1024; startDemo(); addBackToLogin(); route(); };
 
   let session = null;
   try { session = (await sb.auth.getSession()).data.session; } catch(e){}
@@ -1157,6 +1157,10 @@ $("#famList").addEventListener("click", async e => {
   const {error} = await S.sb.from("members").delete().eq("email", b.dataset.remove);
   toast(error ? "Couldn't remove them." : "Removed"); loadFamily();
 });
+function addBackToLogin(){
+  $("#banner").insertAdjacentHTML("beforeend", ' <button type="button" class="linkbtn" id="backToLogin">\u2190 Back to sign in</button>');
+  $("#backToLogin").onclick = () => { history.replaceState(null, "", location.pathname + location.search); location.reload(); };
+}
 async function init(){
   const cfg = window.FVA_CONFIG || {};
   if (cfg.supabaseUrl && cfg.supabaseAnonKey){
