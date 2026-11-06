@@ -1,4 +1,6 @@
-# Family Voice Archive · آرشیف آوازهای خانواده
+# Hadīs-i Nasab · حدیث نسب
+
+*The Tale of Genealogy*: the shared stories and journey of a family, kept in their own voices.
 
 A private archive for our family's Hazara oral tradition: dobaiti, songs, stories, lullabies (لالایی) and proverbs (متل), plus family photos. Everything comes from the family WhatsApp chats.
 
