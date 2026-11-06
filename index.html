@@ -231,6 +231,10 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 (function(){
   "use strict";
   var el = document.getElementById("loader"), cv = document.getElementById("loaderCv"), ctx = cv.getContext("2d");
+  // the app reloads itself after signing in or switching family: go straight through, no welcome screen
+  window.reloadQuiet = function(){ try { sessionStorage.setItem("fva-skip-intro", "1"); } catch(e){} location.reload(); };
+  var quiet = false; try { quiet = sessionStorage.getItem("fva-skip-intro") === "1"; sessionStorage.removeItem("fva-skip-intro"); } catch(e){}
+  if (quiet){ el.remove(); window.__loaderReady = function(){}; return; }
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var seen = false; try { seen = sessionStorage.getItem("fva-intro") === "1"; } catch(e){}
   var WEAVE = 10, NAME = 2.2;
@@ -1303,7 +1307,7 @@ async function initSupabase(cfg){
   S.backend = "supabase"; MAX_BYTES = 50 * 1024 * 1024;
   const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
   S.sb = sb;
-  const out = async () => { await sb.auth.signOut(); try { localStorage.removeItem("fva-family"); } catch(e){} location.hash = ""; location.reload(); };
+  const out = async () => { await sb.auth.signOut(); try { localStorage.removeItem("fva-family"); } catch(e){} location.hash = ""; reloadQuiet(); };
   $("#famOut").onclick = out; $("#signOutBtn").onclick = out;
 
   /* step 1: email account */
@@ -1345,7 +1349,7 @@ async function initSupabase(cfg){
     if (error){ loginError(famErr(error)); return; }
     if (!data){ loginError("That family name and password don't match. Check them with whoever started the archive."); return; }
     try { localStorage.setItem("fva-family-name", name); } catch(_){}
-    rememberFamily(data); history.replaceState(null, "", location.pathname); location.reload();
+    rememberFamily(data); history.replaceState(null, "", location.pathname); reloadQuiet();
   });
 
   /* step 2: join or start a family */
@@ -1361,7 +1365,7 @@ async function initSupabase(cfg){
     btn.disabled = false; btn.textContent = "Join";
     if (error){ loginError(famErr(error)); return; }
     if (!data){ loginError("That family name and password don't match. Check them with whoever started the archive."); return; }
-    rememberFamily(data); location.hash = ""; location.reload();
+    rememberFamily(data); location.hash = ""; reloadQuiet();
   });
   $("#startF").addEventListener("submit", async e => {
     e.preventDefault(); loginError("");
@@ -1373,12 +1377,12 @@ async function initSupabase(cfg){
     const {data, error} = await sb.rpc("create_family", {p_name:name, p_password:pw, p_display_name:me});
     btn.disabled = false; btn.textContent = "Start our archive";
     if (error){ loginError(famErr(error)); return; }
-    rememberFamily(data); location.hash = ""; location.reload();
+    rememberFamily(data); location.hash = ""; reloadQuiet();
   });
 
   let session = null;
   try { session = (await sb.auth.getSession()).data.session; } catch(e){}
-  sb.auth.onAuthStateChange((ev, s) => { if (ev === "SIGNED_IN" && !S.signedIn && !S.guestSigningIn && s && !s.user.is_anonymous){ location.reload(); } });
+  sb.auth.onAuthStateChange((ev, s) => { if (ev === "SIGNED_IN" && !S.signedIn && !S.guestSigningIn && s && !s.user.is_anonymous){ reloadQuiet(); } });
   if (!session){ showGate("loginForm"); return; }
   S.signedIn = true;
   if (/access_token|refresh_token|type=magiclink/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
@@ -1404,7 +1408,7 @@ async function initSupabase(cfg){
   if (fams.length > 1){
     const sel = $("#famSwitch"); sel.hidden = false;
     sel.innerHTML = fams.map(f => `<option value="${esc(f.id)}" ${f.id === fam.id ? "selected" : ""}>${esc(f.name)}</option>`).join("");
-    sel.onchange = () => { rememberFamily(sel.value); location.reload(); };
+    sel.onchange = () => { rememberFamily(sel.value); reloadQuiet(); };
   }
   if (fam.me) $("#sharedBy").value = fam.me;
   $("#importer").hidden = false;
@@ -1489,7 +1493,7 @@ $("#leaveFam").addEventListener("click", async () => {
   const {error} = await S.sb.from("family_members").delete().eq("family_id", S.family.id).eq("user_id", uid);
   if (error){ toast("Couldn't leave right now."); return; }
   try { localStorage.removeItem("fva-family"); } catch(e){}
-  location.hash = ""; location.reload();
+  location.hash = ""; reloadQuiet();
 });
 async function init(){
   const cfg = window.FVA_CONFIG || {};
