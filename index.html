@@ -151,6 +151,39 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .famadd .field{flex:1 1 220px}
 .locked{padding:18px;border:1.5px dashed var(--muted);border-radius:6px}
 
+
+/* ===== gallery: rug mosaic ===== */
+.ghead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px}
+.ghead h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,5vw,48px);line-height:1}
+.ghead .nast{font-size:clamp(26px,4vw,34px);line-height:2.1;color:var(--red-ink);margin:0}
+.rugwrap{position:relative;margin:30px 30px 10px;filter:drop-shadow(0 12px 20px rgba(0,0,0,.45))}
+.rugwrap::before,.rugwrap::after{content:"";position:absolute;top:30px;bottom:30px;width:26px;background:repeating-linear-gradient(180deg,#D9C9A8 0 3px,transparent 3px 8px)}
+.rugwrap::before{left:-26px}.rugwrap::after{right:-26px}
+.rug{background:#7A1616;padding:12px;border-radius:2px}
+.rug .b1{background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Crect width='22' height='22' fill='%23E6D5B5'/%3E%3Cpath d='M11 2L20 11 11 20 2 11z' fill='%237A1616'/%3E%3Cpath d='M11 6L16 11 11 16 6 11z' fill='%231E2340'/%3E%3Ccircle cx='11' cy='11' r='1.6' fill='%23C08A3E'/%3E%3C/svg%3E");padding:22px}
+.rug .b2{background:#E6D5B5;padding:5px}
+.rug .b3{background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%231E2340'/%3E%3Cpolygon points='0,16 8,6 16,16' fill='%237A1616'/%3E%3Ccircle cx='8' cy='3' r='1.4' fill='%23E6D5B5'/%3E%3C/svg%3E");padding:12px}
+.rug .b4{background:#E6D5B5;padding:4px}
+.rug .field{background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%231E2340'/%3E%3Cpath d='M20 12L28 20 20 28 12 20z' fill='none' stroke='%23C08A3E' stroke-opacity='.25'/%3E%3Ccircle cx='0' cy='0' r='2' fill='%237A1616'/%3E%3Ccircle cx='40' cy='0' r='2' fill='%237A1616'/%3E%3Ccircle cx='0' cy='40' r='2' fill='%237A1616'/%3E%3Ccircle cx='40' cy='40' r='2' fill='%237A1616'/%3E%3C/svg%3E");padding:12px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:clamp(90px,11vw,132px);gap:8px}
+.tile{grid-column:var(--c);grid-row:var(--r);position:relative;padding:0;border:none;overflow:hidden;cursor:zoom-in;background:#3E2E22;color:#F3EEE2;text-align:left}
+.tile img,.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:sepia(.18) contrast(.98);pointer-events:none}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 9px 6px;background:linear-gradient(transparent,rgba(20,8,4,.78));font-family:'Caveat',cursive;font-size:18px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .play{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:999px;background:#7A1616;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.45)}
+.tile .dur{position:absolute;right:7px;top:7px;padding:1px 7px;border-radius:3px;background:rgba(0,0,0,.65);font-size:12px;font-variant-numeric:tabular-nums}
+.tile:focus-visible{outline:3px solid #E2B33C;outline-offset:2px}
+.tile.feat{background:#C08A3E;padding:5px;clip-path:polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%)}
+.tile.feat .in{position:absolute;inset:5px;overflow:hidden;clip-path:polygon(14% 0,86% 0,100% 14%,100% 86%,86% 100%,14% 100%,0 86%,0 14%);background:#3E2E22}
+.tile.feat .cap{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(18px,2vw,24px);padding:30px 18% 14px;white-space:normal;text-align:center}
+.tile.feat .cap small{display:block;font-family:'Source Sans 3',sans-serif;font-weight:400;font-size:13px;margin-top:2px}
+.tile.feat .play{width:60px;height:60px;margin:-30px 0 0 -30px}
+.rugno{position:absolute;left:18px;top:-16px;background:#161616;color:#EDEDED;padding:3px 10px;border-radius:3px;font-family:'Special Elite',monospace;letter-spacing:.12em;font-size:13px;transform:rotate(-2deg);z-index:2}
+@media (max-width:640px){
+  .rugwrap{margin:24px 14px 8px}.rugwrap::before{left:-14px;width:14px}.rugwrap::after{right:-14px;width:14px}
+  .rug{padding:8px}.rug .b1{padding:12px}.rug .b3{padding:6px}
+  .rug .field{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:96px;grid-auto-flow:dense;gap:6px;padding:8px}
+  .tile{grid-column:auto;grid-row:auto}.tile.wide{grid-column:span 2}.tile.feat{grid-column:1/-1;grid-row:span 2}
+}
+
 /* tab bar */
 .tabwrap{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,100%);z-index:20;filter:drop-shadow(0 -3px 6px rgba(0,0,0,.35))}
 .tabbar{background:var(--sheet);clip-path:polygon(0.00% 6.29%,1.74% 2.54%,5.17% 0.61%,6.63% 0.45%,8.57% 1.11%,10.75% 3.43%,12.61% 4.06%,15.61% 2.23%,17.22% 6.89%,19.55% 0.55%,21.08% 5.08%,23.42% 6.56%,26.54% 0.57%,29.68% 6.76%,33.42% 5.95%,36.24% 6.45%,39.48% 2.93%,41.44% 0.09%,42.91% 2.80%,44.37% 0.92%,46.75% 1.79%,50.42% 1.30%,53.06% 3.64%,55.32% 5.53%,58.95% 5.84%,60.37% 2.48%,62.66% 6.39%,65.63% 2.61%,68.67% 6.82%,70.14% 6.81%,71.64% 0.06%,73.01% 6.04%,75.04% 6.08%,77.82% 0.36%,81.49% 1.13%,85.11% 6.23%,87.72% 0.55%,89.18% 1.63%,90.93% 5.24%,92.70% 3.06%,94.18% 5.91%,96.28% 0.18%,99.36% 4.82%,100.00% 0.00%,100.00% 100.00%,0.00% 100.00%);height:78px;display:flex;align-items:center;justify-content:space-around;padding:10px 10px 0}
@@ -326,6 +359,24 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
     <main id="feed"><p class="status">Opening the archive…</p></main>
   </section>
 
+  <section id="viewPhotos" aria-labelledby="photosTitle" hidden>
+    <div class="ghead">
+      <div><span class="type" style="font-size:13px;color:var(--muted)" id="gCount"></span><h2 id="photosTitle">Photos &amp; videos</h2></div>
+      <p class="nast" lang="fa">عکس‌ها و ویدیوها</p>
+    </div>
+    <div class="toolbar" role="search" aria-label="Filter photos and videos">
+      <div class="seg" role="group" aria-label="Show">
+        <button type="button" data-gk="all" aria-pressed="true">All <span data-gcount="all"></span></button>
+        <button type="button" data-gk="photo" aria-pressed="false">Photos <span data-gcount="photo"></span></button>
+        <button type="button" data-gk="video" aria-pressed="false">Videos <span data-gcount="video"></span></button>
+      </div>
+      <label class="sr" for="gSender">Shared by</label><select id="gSender"><option value="">Everyone</option></select>
+      <label class="sr" for="gDecade">Years</label><select id="gDecade"><option value="">All years</option></select>
+      <span class="hand" style="font-size:21px;margin-left:auto">the newest one sits in the medallion</span>
+    </div>
+    <div id="gallery"></div>
+  </section>
+
   <section id="viewAdd" aria-labelledby="addTitle" hidden>
     <div class="teahead">
       <h2 id="addTitle">Pour some tea. Bring in the voices.</h2>
@@ -403,6 +454,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 
 <div class="tabwrap"><nav class="tabbar" aria-label="Main">
   <a href="#listen" data-nav="listen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8c3-3 6 3 9 0s6 3 9 0M3 16c3-3 6 3 9 0s6 3 9 0"/></svg>Listen</a>
+  <a href="#photos" data-nav="photos"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Photos</a>
   <a href="#add" data-nav="add" class="rec" aria-label="Add voice notes"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></a>
   <button type="button" id="searchNav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>Search</button>
 </nav></div>
@@ -1017,17 +1069,81 @@ function startPreview(reason){
   $("#impNote").textContent = "preview mode: try an import, nothing leaves this page";
   render();
 }
+/* ===== gallery: rug mosaic ===== */
+S.g = {kind:"all", sender:"", decade:""};
+const SLOTS = [ // [column, row] in a 6 x 5 rug field; the first is the centre medallion
+  ["3 / span 2", "2 / span 2", "feat"], ["1 / span 2", "1 / span 2", "wide"], ["3", "1"], ["4", "1"], ["5 / span 2", "1", "wide"],
+  ["5", "2 / span 2"], ["6", "2"], ["1", "3"], ["2", "3 / span 2"], ["6", "3 / span 2"], ["1", "4 / span 2"],
+  ["3 / span 2", "4", "wide"], ["5", "4"], ["2 / span 2", "5", "wide"], ["4 / span 2", "5", "wide"], ["6", "5"]];
+function decadeOf(ms){ if (!ms) return ""; return Math.floor(new Date(ms).getFullYear() / 10) * 10 + "s"; }
+function galleryItems(){
+  const f = S.g;
+  let arr = [...S.items.values()].filter(i => i.kind === "photo" || i.kind === "video");
+  if (f.kind !== "all") arr = arr.filter(i => i.kind === f.kind);
+  if (f.sender) arr = arr.filter(i => (i.sender || "") === f.sender);
+  if (f.decade) arr = arr.filter(i => decadeOf(i.dateMs) === f.decade);
+  return arr.sort((a, b) => (b.dateMs || 0) - (a.dateMs || 0));
+}
+function tileHTML(it, slot){
+  const [c, r, cls] = slot, feat = cls === "feat";
+  const src = srcFor(it);
+  const media = it.kind === "video"
+    ? `<video muted playsinline preload="metadata" src="${esc(src)}${src && !src.startsWith("blob:") ? "#t=0.5" : ""}"></video><span class="play" aria-hidden="true"><svg width="${feat ? 24 : 16}" height="${feat ? 24 : 16}" viewBox="0 0 24 24" fill="#F7F0E4"><path d="M7 4l13 8-13 8z"/></svg></span>${it.duration ? `<span class="dur">${fmtDur(it.duration)}</span>` : ""}`
+    : `<img src="${esc(src)}" alt="" loading="lazy">`;
+  const title = it.title || (it.caption || "").split("\n")[0] || (it.kind === "video" ? "A family video" : "");
+  const cap = feat ? `<span class="cap">${esc(title || "A family photo")}<small>${esc(fmtDate(it.dateMs))}${it.sender ? " · shared by " + esc(it.sender) : ""}</small></span>`
+                   : (title ? `<span class="cap">${esc(title)}</span>` : "");
+  const label = (it.kind === "video" ? "Play video" : "Open photo") + (title ? ": " + title : "") + (it.sender ? ", shared by " + it.sender : "");
+  return `<button type="button" class="tile ${cls || ""}" style="--c:${c};--r:${r}" data-open="${esc(it.id)}" aria-label="${esc(label)}">${feat ? `<span class="in">${media}${cap}</span>` : media + cap}</button>`;
+}
+function renderGallery(){
+  const all = [...S.items.values()].filter(i => i.kind === "photo" || i.kind === "video");
+  const nP = all.filter(i => i.kind === "photo").length, nV = all.filter(i => i.kind === "video").length;
+  const sc = (k, n) => { const s = document.querySelector(`[data-gcount="${k}"]`); if (s) s.textContent = "(" + n + ")"; };
+  sc("all", all.length); sc("photo", nP); sc("video", nV);
+  $("#gCount").textContent = nP + " PHOTO" + (nP === 1 ? "" : "S") + " · " + nV + " VIDEO" + (nV === 1 ? "" : "S");
+  const senders = [...new Set(all.map(i => i.sender || ""))].sort((a, b) => a.localeCompare(b));
+  const decades = [...new Set(all.map(i => decadeOf(i.dateMs)).filter(Boolean))].sort().reverse();
+  const keepS = S.g.sender, keepD = S.g.decade;
+  $("#gSender").innerHTML = '<option value="">Everyone</option>' + senders.map(s => `<option value="${esc(s)}">${esc(s || "Unknown sender")}</option>`).join("");
+  $("#gDecade").innerHTML = '<option value="">All years</option>' + decades.map(d => `<option value="${d}">${d}</option>`).join("");
+  $("#gSender").value = senders.includes(keepS) ? keepS : ""; $("#gDecade").value = decades.includes(keepD) ? keepD : "";
+  S.g.sender = $("#gSender").value; S.g.decade = $("#gDecade").value;
+  const g = $("#gallery");
+  if (!S.ready){ g.innerHTML = '<p class="status">Opening the archive…</p>'; return; }
+  if (!all.length){ g.innerHTML = `<div class="empty"><span class="tape" aria-hidden="true"></span><div class="scrapwrap" style="transform:rotate(-.8deg)"><div class="scrap">
+      <h2>No photos or videos yet</h2><p style="margin:0">When someone imports a WhatsApp chat with media, or adds photos on the Add page, they'll be woven into a rug here.</p>
+      <p style="margin:10px 0 0"><a class="btn primary" href="#add">Add photos</a></p></div></div></div>`; return; }
+  const arr = galleryItems();
+  if (!arr.length){ g.innerHTML = '<p class="status">Nothing matches these filters.</p>'; return; }
+  let html = "";
+  for (let k = 0; k < arr.length; k += SLOTS.length){
+    const chunk = arr.slice(k, k + SLOTS.length);
+    const first = chunk[0], last = chunk[chunk.length - 1];
+    const span = [last.dateMs, first.dateMs].filter(Boolean).map(ms => new Date(ms).getFullYear());
+    const when = span.length ? (span[0] === span[1] ? String(span[0]) : span[0] + " – " + span[1]) : "";
+    html += `<section class="rugwrap" aria-label="Rug ${k / SLOTS.length + 1}${when ? ", " + when : ""}">${when ? `<span class="rugno">${esc(when)}</span>` : ""}
+      <div class="rug"><div class="b1"><div class="b2"><div class="b3"><div class="b4"><div class="field">${chunk.map((it, i) => tileHTML(it, SLOTS[i])).join("")}</div></div></div></div></div></div></section>`;
+  }
+  g.innerHTML = html;
+}
+document.querySelectorAll("[data-gk]").forEach(b => b.addEventListener("click", () => {
+  S.g.kind = b.dataset.gk; document.querySelectorAll("[data-gk]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderGallery(); }));
+$("#gSender").addEventListener("change", e => { S.g.sender = e.target.value; renderGallery(); });
+$("#gDecade").addEventListener("change", e => { S.g.decade = e.target.value; renderGallery(); });
+render = (orig => function(){ orig(); if (!$("#viewPhotos").hidden) renderGallery(); })(render);
+
 function route(){
-  if (S.gate){ $("#viewLogin").hidden = false; $("#viewListen").hidden = true; $("#viewAdd").hidden = true; document.querySelector(".tabwrap").hidden = true; return; }
+  if (S.gate){ $("#viewLogin").hidden = false; $("#viewListen").hidden = true; $("#viewAdd").hidden = true; $("#viewPhotos").hidden = true; document.querySelector(".tabwrap").hidden = true; return; }
   $("#viewLogin").hidden = true; document.querySelector(".tabwrap").hidden = false;
-  const add = location.hash === "#add";
-  $("#viewAdd").hidden = !add; $("#viewListen").hidden = add;
-  document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === (add ? "add" : "listen")) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
-  if (!add) render();
+  const view = location.hash === "#add" ? "add" : location.hash === "#photos" ? "photos" : "listen";
+  $("#viewAdd").hidden = view !== "add"; $("#viewListen").hidden = view !== "listen"; $("#viewPhotos").hidden = view !== "photos";
+  document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (view !== "add") render();
   window.scrollTo({top:0});
 }
 window.addEventListener("hashchange", route);
-$("#searchNav").addEventListener("click", () => { if (location.hash === "#add") location.hash = "#listen"; setTimeout(() => { $("#fQ").focus(); $("#fQ").scrollIntoView({block:"center"}); }, 50); });
+$("#searchNav").addEventListener("click", () => { if (location.hash === "#add" || location.hash === "#photos") location.hash = "#listen"; setTimeout(() => { $("#fQ").focus(); $("#fQ").scrollIntoView({block:"center"}); }, 50); });
 const _observeImporter = new MutationObserver(() => { $("#addLocked").hidden = !$("#importer").hidden; });
 _observeImporter.observe($("#importer"), {attributes:true, attributeFilter:["hidden"]});
 

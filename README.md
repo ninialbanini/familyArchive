@@ -15,6 +15,7 @@ The design follows a handmade collage idea. It has Persian rugs in the backgroun
   - an English translation
   - the story behind it
   - place, sender and date
+- **Photos & videos page:** a gallery where every photo and video is woven into a rug mosaic. Each rug holds up to 16 items, with the newest in the gold medallion at the centre. You can filter by photos or videos, by who shared them and by decade, and tapping a tile opens it full size.
 - **Finding things:** search, filters by sender and type, newest/oldest sort, light and dark themes, and a phone-friendly layout.
 - **Duplicates:** re-importing the same chat only adds new items.
 
