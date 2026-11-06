@@ -53,7 +53,9 @@ The site uses [Supabase](https://supabase.com) (free tier) for accounts, the dat
 
 - **Accounts:** anyone can make an account by signing in with their email. They get an emailed link, so there's no account password.
 - **Starting a family:** a signed-in person can start a family archive by choosing a **family name** and a **family password**. They become its **keeper**.
-- **Joining:** relatives sign in, choose **Join my family**, and type that family name and password. Once in, every member can listen, upload, edit and delete. Uploads and edits carry the person's name.
+- **Joining:** relatives can come in two ways:
+  - **Family password (no email):** type the family name, the family password and their name. The invite link from Family settings fills in the family name, so they only type the password.
+  - **My email:** sign in with their email, choose **Join my family**, and type the family name and password. Once in, every member can listen, upload, edit and delete. Uploads and edits carry the person's name.
 - **Keepers:** they can change the family password, make others keepers, and remove members, all from **Family settings**. Settings also has a ready-made invite message.
 - **More than one family:** people can belong to several families and switch between them at the top of the page.
 - **Privacy:** each family only ever sees its own recordings and photos, which sit in a private storage bucket. Each file can be up to 50 MB.
@@ -70,8 +72,9 @@ The site uses [Supabase](https://supabase.com) (free tier) for accounts, the dat
 1. **Create a project.** Sign up at supabase.com and create a project.
 2. **Run the setup script.** Open **SQL Editor → New query**, paste in everything from [`supabase/setup.sql`](supabase/setup.sql), and click **Run**. It creates the tables, the password checks, the private `media` bucket and all the security rules. You can run it again safely.
 3. **Set the sign-in addresses.** Go to **Authentication → URL Configuration**, set **Site URL** to `https://ninialbanini.github.io/familyArchive/`, and add the same address under **Redirect URLs**.
-4. **Copy your keys.** In the project's **Connect** panel, copy the Project URL and the publishable (or `anon`) key into [`config.js`](config.js), then commit. Both are safe to publish.
-5. **Start your archive.** Open the site, sign in with your email and choose **Start a new one**.
+4. **Turn on password-only entry.** Go to **Authentication → Sign In / Providers** and switch on **Allow anonymous sign-ins**. This lets relatives come in with just the family password. People who come in this way stay signed in on that device; if they clear their browser, they type the password again. Only email accounts can start a new family.
+5. **Copy your keys.** In the project's **Connect** panel, copy the Project URL and the publishable (or `anon`) key into [`config.js`](config.js), then commit. Both are safe to publish.
+6. **Start your archive.** Open the site, sign in with your email and choose **Start a new one**.
 
 If you ran the earlier single-family setup, [`supabase/cleanup-old.sql`](supabase/cleanup-old.sql) removes its old tables. That's optional.
 

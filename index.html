@@ -235,11 +235,24 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
           <h2 id="loginTitle">Come in, sit down.</h2>
           <p class="nast" lang="fa">خوش آمدید</p>
           <div id="loginForm">
+            <div class="seg" role="group" aria-label="How to come in" style="display:inline-flex;margin:4px 0 12px">
+              <button type="button" data-way="pw" aria-pressed="true">Family password</button>
+              <button type="button" data-way="email" aria-pressed="false">My email</button>
+            </div>
+            <form id="guestF" novalidate>
+              <div class="field"><label for="gName">Family name</label><input id="gName" type="text" autocomplete="off" placeholder="e.g. Wafa Family"></div>
+              <div class="field" style="margin-top:8px"><label for="gPw">Family password</label><input id="gPw" type="password" autocomplete="current-password"></div>
+              <div class="field" style="margin-top:8px"><label for="gMe">Your name</label><input id="gMe" type="text" autocomplete="name" placeholder="so everyone knows who added what"></div>
+              <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="gBtn">Come in</button></p>
+              <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">no email needed, just what the family shared with you</p>
+            </form>
+            <div id="emailWay" hidden>
             <form id="loginF" novalidate>
               <div class="field"><label for="loginEmail">Your email</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div>
               <p style="margin:12px 0 0"><button class="btn primary" type="submit" id="loginBtn">Email me a sign-in link</button></p>
             </form>
-            <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">new here? this makes your account, there's no password to remember</p>
+            <p class="hand" style="font-size:21px;line-height:1.1;margin:10px 0 0">new here? this makes your account, and lets you start your own family archive</p>
+            </div>
           </div>
           <div id="loginSent" hidden>
             <p class="serif" style="font-size:26px;margin:0">Check your email.</p>
@@ -1085,6 +1098,7 @@ function famErr(e){
   if (/password too short/.test(m)) return "The family password needs at least 8 characters.";
   if (/name too short/.test(m)) return "Type a family name.";
   if (/too many/.test(m)) return "Too many wrong tries. Wait 15 minutes and try again.";
+  if (/sign in with your email/.test(m)) return "To start a new family, sign in with your email first.";
   if (/function .* does not exist|could not find the function|schema cache/i.test(m)) return "The archive isn't set up yet: run supabase/setup.sql in your Supabase project.";
   return "Something went wrong: " + m;
 }
@@ -1108,6 +1122,35 @@ async function initSupabase(cfg){
     $("#sentTo").textContent = email; loginPanel("loginSent");
   });
   $("#loginAgain").onclick = () => loginPanel("loginForm");
+
+  /* password only: guest sign-in, then join */
+  const qs = new URLSearchParams(location.search);
+  let remembered = ""; try { remembered = localStorage.getItem("fva-family-name") || ""; } catch(e){}
+  $("#gName").value = qs.get("family") || remembered;
+  const setWay = w => { document.querySelectorAll("[data-way]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.way === w)));
+    $("#guestF").hidden = w !== "pw"; $("#emailWay").hidden = w !== "email"; loginError(""); };
+  document.querySelectorAll("[data-way]").forEach(b => b.addEventListener("click", () => setWay(b.dataset.way)));
+  $("#guestF").addEventListener("submit", async e => {
+    e.preventDefault(); loginError("");
+    const name = $("#gName").value.trim(), pw = $("#gPw").value, me = $("#gMe").value.trim();
+    if (!name || !pw){ loginError("Type the family name and the family password."); return; }
+    const btn = $("#gBtn"); btn.disabled = true; btn.textContent = "Checking…";
+    const done = () => { btn.disabled = false; btn.textContent = "Come in"; };
+    let s = null; try { s = (await sb.auth.getSession()).data.session; } catch(_){}
+    if (!s){
+      S.guestSigningIn = true;
+      const {error} = await sb.auth.signInAnonymously();
+      if (error){ done(); S.guestSigningIn = false;
+        loginError(/anonymous/i.test(error.message) ? "Coming in with just the family password isn't switched on yet. The archive's keeper needs to allow anonymous sign-ins in Supabase." :
+          /rate|too many/i.test(error.message) ? "Too many tries from this network just now. Wait a while and try again." : "Couldn't come in: " + error.message); return; }
+    }
+    const {data, error} = await sb.rpc("join_family", {p_name:name, p_password:pw, p_display_name:me});
+    done();
+    if (error){ loginError(famErr(error)); return; }
+    if (!data){ loginError("That family name and password don't match. Check them with whoever started the archive."); return; }
+    try { localStorage.setItem("fva-family-name", name); } catch(_){}
+    rememberFamily(data); history.replaceState(null, "", location.pathname); location.reload();
+  });
 
   /* step 2: join or start a family */
   const setFam = w => { document.querySelectorAll("[data-fam]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.fam === w)));
@@ -1139,17 +1182,20 @@ async function initSupabase(cfg){
 
   let session = null;
   try { session = (await sb.auth.getSession()).data.session; } catch(e){}
-  sb.auth.onAuthStateChange((ev, s) => { if (ev === "SIGNED_IN" && !S.signedIn && s){ location.reload(); } });
+  sb.auth.onAuthStateChange((ev, s) => { if (ev === "SIGNED_IN" && !S.signedIn && !S.guestSigningIn && s && !s.user.is_anonymous){ location.reload(); } });
   if (!session){ showGate("loginForm"); return; }
   S.signedIn = true;
   if (/access_token|refresh_token|type=magiclink/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
   const email = (session.user && session.user.email) || "", uid = session.user.id;
-  $("#meEmail").textContent = email;
+  const guest = !!(session.user && session.user.is_anonymous);
+  S.guest = guest;
+  $("#meEmail").textContent = guest ? "a guest" : email;
+  if (guest) document.querySelector('[data-fam="start"]').hidden = true;
 
   const {data:mine, error:famErrQ} = await sb.from("family_members").select("family_id,role,display_name,families(name)").eq("user_id", uid);
   if (famErrQ){ showGate("loginFamily"); loginError(famErr(famErrQ)); return; }
   const fams = (mine || []).map(r => ({id:r.family_id, role:r.role, me:r.display_name || "", name:(r.families && r.families.name) || "Our family"}));
-  if (!fams.length){ showGate("loginFamily"); return; }
+  if (!fams.length){ if (guest){ S.signedIn = false; showGate("loginForm"); } else showGate("loginFamily"); return; }
   const fam = fams.find(f => f.id === lastFamily()) || fams[0];
   rememberFamily(fam.id);
   S.family = fam; S.role = fam.role; S.canEdit = true; S.storage = true; S.myName = fam.me;
@@ -1191,15 +1237,14 @@ async function loadFamily(){
   $("#famTitle").textContent = f.name;
   $("#myName").value = S.myName || "";
   $("#keeperBox").hidden = f.role !== "keeper";
-  $("#inviteText").value = "Join our family's voice archive: " + location.origin + location.pathname +
-    "\nSign in with your email, choose “Join my family” and type the family name: " + f.name +
-    "\nI'll tell you the family password separately.";
+  $("#inviteText").value = "Join our family's voice archive: " + location.origin + location.pathname + "?family=" + encodeURIComponent(f.name) +
+    "\nChoose \u201cFamily password\u201d and type the password I'll tell you separately. (Or sign in with your email and choose \u201cJoin my family\u201d.)";
   const {data, error} = await S.sb.from("family_members").select("user_id,email,display_name,role").eq("family_id", f.id).order("joined_at");
   const ul = $("#famList");
   if (error){ ul.innerHTML = "<li>Couldn't load the family list.</li>"; return; }
   const me = (await S.user.id());
   const keeper = f.role === "keeper";
-  ul.innerHTML = data.map(m => `<li><span class="em">${esc(m.display_name || m.email || "Someone")}${m.user_id === me ? " (you)" : ""}<br><span style="font-weight:400;font-size:14px;color:var(--muted)">${esc(m.email || "")}</span></span>
+  ul.innerHTML = data.map(m => `<li><span class="em">${esc(m.display_name || m.email || "Someone")}${m.user_id === me ? " (you)" : ""}<br><span style="font-weight:400;font-size:14px;color:var(--muted)">${esc(m.email || "came in with the family password")}</span></span>
     ${keeper && m.user_id !== me ? `<label class="sr" for="r-${esc(m.user_id)}">Role</label><select id="r-${esc(m.user_id)}" data-role-for="${esc(m.user_id)}"><option value="member" ${m.role === "member" ? "selected" : ""}>Member</option><option value="keeper" ${m.role === "keeper" ? "selected" : ""}>Keeper</option></select>
       <button type="button" class="linkbtn" data-remove="${esc(m.user_id)}">Remove</button>` : `<span class="chip">${m.role === "keeper" ? "Keeper" : "Member"}</span>`}</li>`).join("");
 }

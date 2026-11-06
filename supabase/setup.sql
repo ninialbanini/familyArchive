@@ -5,7 +5,9 @@
 -- How it works: anyone can make an account (email sign-in link). A signed-in
 -- person can START a family archive, choosing a family name and a family
 -- password, and becomes its keeper. Relatives JOIN by typing that family name
--- and password. Each family only ever sees its own recordings and photos.
+-- and password, either after signing in with their email or with no email at
+-- all (as a guest; turn on Authentication → Sign In / Providers → "Allow
+-- anonymous sign-ins"). Each family only ever sees its own recordings and photos.
 
 create extension if not exists pgcrypto with schema extensions;
 
@@ -89,6 +91,9 @@ declare
   fid uuid;
 begin
   if uid is null then raise exception 'not signed in'; end if;
+  if coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false) then
+    raise exception 'sign in with your email to start a family';
+  end if;
   if length(n) < 2 then raise exception 'family name too short'; end if;
   if length(coalesce(p_password, '')) < 8 then raise exception 'password too short'; end if;
   if exists (select 1 from public.families where lower(name) = lower(n)) then raise exception 'family name taken'; end if;
