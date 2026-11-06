@@ -221,7 +221,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </style>
 </head>
 <body>
-<div id="loader" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:200;background:#140907;transition:opacity .6s ease">
+<div id="loader" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:200;background:#140907;transition:opacity .9s ease">
   <canvas id="loaderCv" aria-hidden="true" style="display:block;width:100%;height:100%"></canvas>
   <span class="sr">Opening Hadīs-i Nasab…</span>
   <button type="button" id="skipLoader" style="position:absolute;right:16px;bottom:16px;min-width:44px;min-height:44px;padding:0 16px;border:1px solid rgba(233,216,180,.45);border-radius:999px;background:rgba(20,9,7,.6);color:#E9D8B4;font:600 14px 'Source Sans 3',system-ui,sans-serif;cursor:pointer">Skip</button>
@@ -232,7 +232,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
   var el = document.getElementById("loader"), cv = document.getElementById("loaderCv"), ctx = cv.getContext("2d");
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var seen = false; try { seen = sessionStorage.getItem("fva-intro") === "1"; } catch(e){}
-  var WEAVE = 3.4, NAME = 0.8, HOLD = seen ? 0.35 : 0.9;
+  var WEAVE = 5.6, NAME = 1.4, HOLD = seen ? 0.5 : 1.6;
   var t = (seen || reduce) ? WEAVE + NAME : 0, last = performance.now(), ready = false, shownAt = null, gone = false, W = 0, H = 0;
   var P = {red:"#A3121B", deep:"#6E0B12", cream:"#E9D8B4", navy:"#1E2340", gold:"#C08A3E"};
   function size(){ var d = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
@@ -251,7 +251,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
   function finish(){
     if (gone) return; gone = true; try { sessionStorage.setItem("fva-intro", "1"); } catch(e){}
     el.style.opacity = "0"; el.style.pointerEvents = "none";
-    setTimeout(function(){ el.remove(); }, 650);
+    setTimeout(function(){ el.remove(); }, 950);
   }
   window.__loaderReady = function(){ ready = true; };
   setTimeout(function(){ ready = true; }, 9000);           // never wait forever
