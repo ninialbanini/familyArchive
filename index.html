@@ -221,6 +221,73 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
 </style>
 </head>
 <body>
+<div id="loader" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:200;background:#140907;transition:opacity .6s ease">
+  <canvas id="loaderCv" aria-hidden="true" style="display:block;width:100%;height:100%"></canvas>
+  <span class="sr">Opening Hadīs-i Nasab…</span>
+  <button type="button" id="skipLoader" style="position:absolute;right:16px;bottom:16px;min-width:44px;min-height:44px;padding:0 16px;border:1px solid rgba(233,216,180,.45);border-radius:999px;background:rgba(20,9,7,.6);color:#E9D8B4;font:600 14px 'Source Sans 3',system-ui,sans-serif;cursor:pointer">Skip</button>
+</div>
+<script>
+(function(){
+  "use strict";
+  var el = document.getElementById("loader"), cv = document.getElementById("loaderCv"), ctx = cv.getContext("2d");
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var seen = false; try { seen = sessionStorage.getItem("fva-intro") === "1"; } catch(e){}
+  var WEAVE = 3.4, NAME = 0.8, HOLD = seen ? 0.35 : 0.9;
+  var t = (seen || reduce) ? WEAVE + NAME : 0, last = performance.now(), ready = false, shownAt = null, gone = false, W = 0, H = 0;
+  var P = {red:"#A3121B", deep:"#6E0B12", cream:"#E9D8B4", navy:"#1E2340", gold:"#C08A3E"};
+  function size(){ var d = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
+  size(); addEventListener("resize", size);
+  function gul(c, r, cols, rows){
+    var cx = (cols - 1) / 2, cy = (rows - 1) / 2, x = Math.abs(c - cx), y = Math.abs(r - cy);
+    if (c < 2 || c >= cols - 2 || r < 2 || r >= rows - 2) return (c + r) % 4 < 2 ? P.gold : P.deep;
+    if (c === 2 || c === cols - 3 || r === 2 || r === rows - 3) return P.cream;
+    var s = Math.min(cols, rows) / 40, oct = Math.max(x, y * 1.15, (x + y * 1.15) * .72) / s;
+    if (oct > 13.3 && oct < 14.6) return P.cream;
+    if (oct < 13.3){ if (oct > 11.6) return P.navy; if (x < 1 || y < 1) return P.cream; if (oct < 3) return P.gold;
+      return ((x > y * 1.15) === ((c < cx) === (r < cy))) ? P.red : P.deep; }
+    var d = Math.abs((c % 10) - 5) + Math.abs((r % 10) - 5);
+    return d === 2 ? P.gold : P.deep;
+  }
+  function finish(){
+    if (gone) return; gone = true; try { sessionStorage.setItem("fva-intro", "1"); } catch(e){}
+    el.style.opacity = "0"; el.style.pointerEvents = "none";
+    setTimeout(function(){ el.remove(); }, 650);
+  }
+  window.__loaderReady = function(){ ready = true; };
+  setTimeout(function(){ ready = true; }, 9000);           // never wait forever
+  document.getElementById("skipLoader").onclick = finish;
+  function frame(now){
+    if (gone) return;
+    var dt = Math.min(.05, (now - last) / 1000); last = now; t += dt;
+    var side = Math.min(W * .78, H * .62, 520), cell = Math.max(5, Math.floor(side / 44));
+    var cols = Math.floor(side / cell), rows = Math.floor(side * 1.25 / cell); if (rows * cell > H * .78) rows = Math.floor(H * .78 / cell);
+    var ox = Math.round((W - cols * cell) / 2), oy = Math.round((H - rows * cell) / 2);
+    ctx.fillStyle = "#140907"; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(233,216,180,.16)"; ctx.lineWidth = 1;
+    for (var c = 0; c <= cols; c++){ ctx.beginPath(); ctx.moveTo(ox + c * cell + .5, oy - 30); ctx.lineTo(ox + c * cell + .5, oy + rows * cell + 30); ctx.stroke(); }
+    var prog = Math.min(1, t / WEAVE) * rows, done = Math.floor(prog), frac = prog - done;
+    for (var r = 0; r < Math.min(rows, done + 1); r++){
+      var rr = rows - 1 - r, y = oy + rr * cell, left = r % 2 === 1, upto = r === done ? Math.floor(frac * cols) : cols;
+      for (var k = 0; k < upto; k++){ var cc = left ? cols - 1 - k : k; ctx.fillStyle = gul(cc, rr, cols, rows); ctx.fillRect(ox + cc * cell, y, cell - .6, cell - .6); }
+      if (r === done && done < rows){ var hx = ox + (left ? cols - upto : upto) * cell, g = ctx.createRadialGradient(hx, y + cell / 2, 0, hx, y + cell / 2, 26);
+        g.addColorStop(0, "rgba(255,226,160,.95)"); g.addColorStop(1, "rgba(255,226,160,0)"); ctx.fillStyle = g; ctx.fillRect(hx - 26, y - 22, 52, 52); }
+    }
+    var nameIn = Math.max(0, Math.min(1, (t - WEAVE) / NAME));
+    if (nameIn > 0){
+      if (shownAt === null && nameIn >= 1) shownAt = t;
+      ctx.fillStyle = "rgba(20,9,7," + (.6 * nameIn) + ")"; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = "center"; ctx.fillStyle = "rgba(233,216,180," + nameIn + ")";
+      ctx.font = "600 " + Math.round(side * .15) + "px 'Noto Nastaliq Urdu', serif"; ctx.fillText("حدیث نسب", W / 2, H / 2 + side * .02);
+      ctx.font = "600 " + Math.round(side * .085) + "px 'Cormorant Garamond', Georgia, serif"; ctx.fillText("Hadīs-i Nasab", W / 2, H / 2 + side * .16);
+      ctx.font = Math.round(Math.max(11, side * .032)) + "px 'Special Elite', monospace"; ctx.fillText("THE TALE OF GENEALOGY", W / 2, H / 2 + side * .23);
+      if (!ready){ var a = .35 + .35 * Math.sin(t * 3); ctx.fillStyle = "rgba(255,226,160," + a + ")"; ctx.fillRect(W / 2 - 30, H / 2 + side * .28, 60, 2); }
+    }
+    if (ready && shownAt !== null && t - shownAt >= HOLD){ finish(); return; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
 <svg id="rugbg" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
 <filter id="bg-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" stitchTiles="stitch"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.22  0 0 0 0 0.16  0 0 0 0 0.10  0.75 0 0 0 -0.3"></feColorMatrix></filter>
 <filter id="bg-mottle" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="9"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.15  0.5 0 0 0 -0.18"></feColorMatrix></filter>
@@ -1427,7 +1494,7 @@ async function init(){
 }
 
 route();
-init();
+Promise.resolve().then(init).catch(() => {}).finally(() => { if (window.__loaderReady) window.__loaderReady(); });
 </script>
 </body>
 </html>
