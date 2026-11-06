@@ -232,7 +232,7 @@ dialog::backdrop{background:rgba(20,6,4,.62)}
   var el = document.getElementById("loader"), cv = document.getElementById("loaderCv"), ctx = cv.getContext("2d");
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var seen = false; try { seen = sessionStorage.getItem("fva-intro") === "1"; } catch(e){}
-  var WEAVE = 5.6, NAME = 1.4, HOLD = seen ? 0.5 : 1.6;
+  var WEAVE = 8, NAME = 1.8, HOLD = seen ? 0.5 : 2;
   var t = (seen || reduce) ? WEAVE + NAME : 0, last = performance.now(), ready = false, shownAt = null, gone = false, W = 0, H = 0;
   var P = {red:"#A3121B", deep:"#6E0B12", cream:"#E9D8B4", navy:"#1E2340", gold:"#C08A3E"};
   function size(){ var d = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
