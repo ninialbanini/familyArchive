@@ -129,6 +129,10 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .check input{width:20px;height:20px}
 .notecard{background:var(--paper);padding:20px 20px 18px;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.25);transform:rotate(1deg)}
 .notecard ol{margin:6px 0 0;padding-left:22px}.notecard li{margin:4px 0}
+.rangebox{margin:4px 0 14px}
+.rangeseg{display:grid;grid-template-columns:1fr;border-radius:14px;margin-top:6px;max-width:340px}
+.rangeseg button{border-radius:10px;text-align:left;padding:0 14px}
+.rangedates{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}.rangedates .field{flex:1 1 140px;margin:0}
 .progress{margin-top:22px;display:none;position:relative;z-index:2}
 .progress.on{display:block}
 .bar{height:12px;border-radius:999px;background:color-mix(in srgb,var(--paper) 60%,transparent);border:1.5px solid var(--ink);overflow:hidden}
@@ -489,6 +493,19 @@ dialog.listen::backdrop{background:#1B0E0B}
       <div class="promptwrap"><svg class="pclip" style="right:22px;top:-20px" viewBox="0 0 30 80" aria-hidden="true"><path d="M20 22 V 66 a 8 8 0 0 1 -16 0 V 10 a 11 11 0 0 1 22 0 V 58" fill="none" stroke="#4A4A4A" stroke-width="2.6" stroke-linecap="round"></path></svg>
         <div class="prompt">
           <span class="type" style="font-size:13px;color:#5A3A22">BRING IN A CHAT</span>
+          <div class="rangebox">
+            <span style="font-weight:600;font-size:15px" id="rangeLbl">Which messages from the chat?</span>
+            <div class="seg rangeseg" role="group" aria-labelledby="rangeLbl">
+              <button type="button" data-range="all" aria-pressed="true">Everything</button>
+              <button type="button" data-range="since" aria-pressed="false">Only new since last time</button>
+              <button type="button" data-range="custom" aria-pressed="false">Choose dates</button>
+            </div>
+            <div id="rangeDates" class="rangedates" hidden>
+              <div class="field"><label for="rangeFrom">From</label><input id="rangeFrom" type="date"></div>
+              <div class="field"><label for="rangeTo">To</label><input id="rangeTo" type="date"></div>
+            </div>
+            <p id="rangeNote" style="margin:6px 0 0;font-size:15px;color:var(--muted)"></p>
+          </div>
           <div class="drop" id="drop">
             <strong>Drop a WhatsApp export (.zip) or single files here</strong>
             <span style="font-size:15px">Voice notes (.opus, .m4a, .mp3, .wav, .aac), photos (.jpg, .png), videos (.mp4)</span>
@@ -887,6 +904,32 @@ async function saveNew(rec, prepared){
 }
 
 /* ============ import ============ */
+/* which messages to bring in: everything, only new since the last upload of that chat, or a date range */
+const RANGE = {mode:"all"};
+try { const r = JSON.parse(localStorage.getItem("fva-range") || "null"); if (r && r.mode) Object.assign(RANGE, r); } catch(e){}
+function newestFor(chat){ let n = 0; for (const it of S.items.values()) if ((!chat || it.chat === chat) && it.chat !== "Added by hand" && (it.dateMs || 0) > n) n = it.dateMs; return n; }
+function rangeUI(){
+  document.querySelectorAll("[data-range]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.range === RANGE.mode)));
+  $("#rangeDates").hidden = RANGE.mode !== "custom";
+  if (RANGE.mode === "custom"){ $("#rangeFrom").value = RANGE.from || ""; $("#rangeTo").value = RANGE.to || ""; }
+  const n = newestFor();
+  $("#rangeNote").textContent = RANGE.mode === "all" ? "Anything already in the archive is skipped either way, so nothing is added twice."
+    : RANGE.mode === "since" ? (n ? "Only messages from " + new Date(n).toLocaleDateString("en", {month:"short", day:"numeric", year:"numeric"}) + " on (the newest one already here from that chat) will be brought in." : "Nothing is in the archive yet, so everything will be brought in.")
+    : "Only messages between these dates will be brought in. Leave one empty to have no limit on that side.";
+}
+function saveRange(){ try { localStorage.setItem("fva-range", JSON.stringify(RANGE)); } catch(e){} }
+document.querySelectorAll("[data-range]").forEach(b => b.addEventListener("click", () => { RANGE.mode = b.dataset.range; saveRange(); rangeUI(); }));
+["rangeFrom", "rangeTo"].forEach(id => $("#" + id).addEventListener("change", () => { RANGE.from = $("#rangeFrom").value; RANGE.to = $("#rangeTo").value; saveRange(); rangeUI(); }));
+rangeUI();
+function inRange(job){                                    // chat exports only; single files are always added
+  if (!job.zip || RANGE.mode === "all") return true;
+  const d = job.dateMs || 0;
+  if (RANGE.mode === "since"){ const n = newestFor(job.chat); return !n || !d || d >= n; }
+  if (!d) return false;
+  if (RANGE.from && d < new Date(RANGE.from + "T00:00").getTime()) return false;
+  if (RANGE.to && d > new Date(RANGE.to + "T23:59:59.999").getTime()) return false;
+  return true;
+}
 let importing = false, stopReq = false;
 $("#stopImport").addEventListener("click", () => { if (!importing) return; stopReq = true; const b = $("#stopImport"); b.disabled = true; b.textContent = "Stopping after this file…"; });
 function logLine(t){ const d = document.createElement("div"); d.textContent = t; const l = $("#log"); l.appendChild(d); l.scrollTop = l.scrollHeight; }
@@ -922,6 +965,9 @@ async function handleFiles(list){
     const sharedBy = $("#sharedBy").value.trim();
     for (const f of singles){ const fd = dateFromFilename(f.name);
       jobs.push({single:f, chat:"Added by hand", file:f.name, sender:sharedBy, dateMs: fd ? fd.ms : (f.lastModified || Date.now()), caption:""}); }
+    const before = jobs.length, kept = jobs.filter(inRange), outside = before - kept.length;
+    jobs.length = 0; jobs.push(...kept);
+    if (outside) logLine(outside + " file" + (outside === 1 ? " is" : "s are") + " outside the dates you chose, so " + (outside === 1 ? "it was" : "they were") + " left out.");
     const incVideo = $("#incVideo").checked;
     let done = 0; setProgress(0, jobs.length, "Preparing " + jobs.length + " files…");
     for (const j of jobs){
@@ -957,7 +1003,7 @@ async function handleFiles(list){
     }
     if (stopReq){ setProgress(done, jobs.length, "Stopped: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + ". The other " + (jobs.length - done) + " files weren't uploaded. Add the same file again later and it will pick up where it left off.");
       logLine("Upload stopped."); }
-    else setProgress(jobs.length, jobs.length, "Done: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + (skipped.length ? ", " + skipped.length + " skipped" : "") + "." + (S.preview ? " (Preview mode: nothing was saved.)" : ""));
+    else setProgress(jobs.length, jobs.length, "Done: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + (outside ? ", " + outside + " outside your dates" : "") + (skipped.length ? ", " + skipped.length + " skipped" : "") + "." + (S.preview ? " (Preview mode: nothing was saved.)" : ""));
   } catch (e){
     $("#progressText").textContent = "The import stopped: " + ((e && e.message) || "the file couldn't be opened") + ". Nothing after this point was added.";
   } finally {
@@ -1390,6 +1436,7 @@ function emptyHTML(){
     : `<p style="margin:0">When someone with edit access brings in a chat, the voice notes and photos will appear here for you to listen to.</p>`}</div></div></div>`;
 }
 function render(){
+  if (RANGE.mode === "since") rangeUI();
   updateStats();
   const feed = $("#feed");
   if (!S.ready) return;
