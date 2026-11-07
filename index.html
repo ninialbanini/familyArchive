@@ -450,7 +450,6 @@ dialog.listen::backdrop{background:#1B0E0B}
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-tab="all" aria-pressed="true">All <span data-count="all"></span></button>
         <button type="button" data-tab="voice" aria-pressed="false">Voice notes <span data-count="voice"></span></button>
-        <button type="button" data-tab="photo" aria-pressed="false">Photos <span data-count="photo"></span></button>
         <button type="button" data-tab="video" aria-pressed="false">Videos <span data-count="video"></span></button>
       </div>
       <label class="sr" for="fSender">Filter by sender</label><select id="fSender"><option value="">Everyone</option></select>
@@ -522,7 +521,7 @@ dialog.listen::backdrop{background:#1B0E0B}
     </div>
     <div class="progress" id="progress" aria-live="polite">
       <div class="bar" role="progressbar" aria-label="Import progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="barFill"></span></div>
-      <div id="progressText" style="margin-top:6px;font-weight:600"></div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px"><div id="progressText" style="font-weight:600;flex:1;min-width:12em"></div><button type="button" class="btn ghost" id="stopImport" hidden>Stop upload</button></div>
       <div class="log" id="log"></div>
       <div class="skipped" id="skipped"></div>
       <p style="margin:10px 0 0"><a href="#listen" class="btn ghost">Go listen to them</a></p>
@@ -881,7 +880,8 @@ async function saveNew(rec, prepared){
 }
 
 /* ============ import ============ */
-let importing = false;
+let importing = false, stopReq = false;
+$("#stopImport").addEventListener("click", () => { if (!importing) return; stopReq = true; const b = $("#stopImport"); b.disabled = true; b.textContent = "Stopping after this file…"; });
 function logLine(t){ const d = document.createElement("div"); d.textContent = t; const l = $("#log"); l.appendChild(d); l.scrollTop = l.scrollHeight; }
 function setProgress(done, total, label){ const pct = total ? Math.round(done / total * 100) : 0; $("#barFill").style.width = pct + "%";
   $(".bar").setAttribute("aria-valuenow", String(pct)); $("#progressText").textContent = label || (done + " of " + total); }
@@ -890,7 +890,8 @@ function kindWord(k){ return k === "voice" ? "Voice note" : k === "photo" ? "Pho
 async function handleFiles(list){
   if (importing || !list || !list.length) return;
   if (!S.storage && !S.preview) return;
-  importing = true; $("#progress").classList.add("on"); $("#log").textContent = ""; $("#skipped").textContent = "";
+  importing = true; stopReq = false; { const b = $("#stopImport"); b.hidden = false; b.disabled = false; b.textContent = "Stop upload"; }
+  $("#progress").classList.add("on"); $("#log").textContent = ""; $("#skipped").textContent = "";
   const skipped = []; let added = 0, dupes = 0;
   const jobs = [];
   const singles = [];
@@ -917,6 +918,7 @@ async function handleFiles(list){
     const incVideo = $("#incVideo").checked;
     let done = 0; setProgress(0, jobs.length, "Preparing " + jobs.length + " files…");
     for (const j of jobs){
+      if (stopReq) break;
       done++;
       const name = baseName(j.file), c = classify(name);
       try {
@@ -946,11 +948,13 @@ async function handleFiles(list){
       }
       setProgress(done, jobs.length);
     }
-    setProgress(jobs.length, jobs.length, "Done: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + (skipped.length ? ", " + skipped.length + " skipped" : "") + "." + (S.preview ? " (Preview mode: nothing was saved.)" : ""));
+    if (stopReq){ setProgress(done, jobs.length, "Stopped: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + ". The other " + (jobs.length - done) + " files weren't uploaded. Add the same file again later and it will pick up where it left off.");
+      logLine("Upload stopped."); }
+    else setProgress(jobs.length, jobs.length, "Done: " + added + " added" + (dupes ? ", " + dupes + " already in the archive" : "") + (skipped.length ? ", " + skipped.length + " skipped" : "") + "." + (S.preview ? " (Preview mode: nothing was saved.)" : ""));
   } catch (e){
     $("#progressText").textContent = "The import stopped: " + ((e && e.message) || "the file couldn't be opened") + ". Nothing after this point was added.";
   } finally {
-    importing = false; $("#fileInput").value = "";
+    importing = false; stopReq = false; $("#stopImport").hidden = true; $("#fileInput").value = "";
     if (skipped.length){
       const groups = {}; for (const [n, r] of skipped) (groups[r] = groups[r] || []).push(n);
       $("#skipped").innerHTML = "<strong>Skipped</strong><ul>" + Object.entries(groups).map(([r, ns]) =>
@@ -989,7 +993,7 @@ function playerHTML(it, big){
     <audio preload="none" src="${esc(srcFor(it))}"></audio></div>`;
 }
 function filtered(){
-  const f = S.f; let arr = [...S.items.values()];
+  const f = S.f; let arr = [...S.items.values()].filter(i => i.kind !== "photo");   // photos live in the Photos tab only
   if (f.tab !== "all") arr = arr.filter(i => i.kind === f.tab);
   if (f.sender) arr = arr.filter(i => (i.sender || "") === f.sender);
   if (f.type) arr = arr.filter(i => f.type === "__none" ? (i.kind === "voice" && !i.type) : i.type === f.type);
@@ -1003,8 +1007,8 @@ function updateStats(){
   const voices = new Set(v.map(i => (i.sender || "").trim()).filter(Boolean));
   $("#stats").innerHTML = `<span><b>${v.length}</b>voice notes</span><span><b>${p.length}</b>photos</span><span><b>${voices.size}</b>family voices</span>`;
   const set = (k, n) => { const s = document.querySelector(`[data-count="${k}"]`); if (s) s.textContent = "(" + n + ")"; };
-  set("all", all.length); set("voice", v.length); set("photo", p.length); set("video", vi.length);
-  const senders = [...new Set(all.map(i => i.sender || ""))].sort((a, b) => a.localeCompare(b));
+  set("all", all.length - p.length); set("voice", v.length); set("photo", p.length); set("video", vi.length);
+  const senders = [...new Set(all.filter(i => i.kind !== "photo").map(i => i.sender || ""))].sort((a, b) => a.localeCompare(b));
   const sel = $("#fSender"), keep = S.f.sender;
   sel.innerHTML = '<option value="">Everyone</option>' + senders.map(s => `<option value="${esc(s)}">${esc(s || "Unknown sender")}</option>`).join("");
   sel.value = senders.includes(keep) ? keep : ""; if (sel.value !== keep) S.f.sender = "";
