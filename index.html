@@ -138,6 +138,7 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .notecard{background:var(--paper);padding:20px 20px 18px;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.25);transform:rotate(1deg)}
 .notecard ol{margin:6px 0 0;padding-left:22px}.notecard li{margin:4px 0}
 .rangebox{margin:4px 0 14px}
+.photoadd{margin-top:22px;display:flex;flex-direction:column}
 .rangeseg{display:grid;grid-template-columns:1fr;border-radius:14px;margin-top:6px;max-width:340px}
 .rangeseg button{border-radius:10px;text-align:left;padding:0 14px}
 .rangedates{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}.rangedates .field{flex:1 1 140px;margin:0}
@@ -522,6 +523,18 @@ dialog.listen::backdrop{background:#1B0E0B}
           </div>
           <div class="field"><label for="sharedBy">Shared by <span style="font-weight:400">(for single files)</span></label><input id="sharedBy" type="text" placeholder="Who sent it, e.g. Bibi" autocomplete="off"></div>
           <label class="check"><input type="checkbox" id="incVideo"> Also import videos from chat exports</label>
+        </div>
+        <div class="notecard photoadd" id="photoAdd"><span class="tape" aria-hidden="true"></span>
+          <span class="mono" style="font-family:'Special Elite',monospace;letter-spacing:.12em;font-size:13px">ADD PHOTOS, NOT FROM WHATSAPP</span>
+          <p style="margin:6px 0 10px">From your camera roll, your computer, or scans of old prints.</p>
+          <div class="formgrid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px">
+            <div class="field"><label for="phWho">Shared by</label><input id="phWho" type="text" placeholder="e.g. Bibi" autocomplete="off"></div>
+            <div class="field"><label for="phDate">When was it taken? <span style="font-weight:400">(optional)</span></label><input id="phDate" type="date"></div>
+            <div class="field" style="grid-column:1/-1"><label for="phTitle">Title <span style="font-weight:400">(optional, for all the photos you pick now)</span></label><input id="phTitle" type="text" placeholder="e.g. Nowruz in Quetta" autocomplete="off"></div>
+          </div>
+          <input type="file" id="photoInput" class="sr" multiple accept="image/jpeg,image/png,image/webp,image/gif">
+          <label for="photoInput" class="btn primary" style="cursor:pointer;margin-top:12px;align-self:flex-start">Choose photos</label>
+          <p style="margin:8px 0 0;font-size:15px;color:var(--muted)">If you leave the date empty, the date the photo was taken is read from the photo itself when it has one.</p>
         </div>
       </div>
       <div class="notecard"><span class="tape" aria-hidden="true"></span>
@@ -945,7 +958,8 @@ function setProgress(done, total, label){ const pct = total ? Math.round(done / 
   $(".bar").setAttribute("aria-valuenow", String(pct)); $("#progressText").textContent = label || (done + " of " + total); }
 function kindWord(k){ return k === "voice" ? "Voice note" : k === "photo" ? "Photo" : "Video"; }
 
-async function handleFiles(list){
+async function handleFiles(list, opts){
+  opts = opts || {};
   if (importing || !list || !list.length) return;
   if (!S.storage && !S.preview) return;
   importing = true; stopReq = false; { const b = $("#stopImport"); b.hidden = false; b.disabled = false; b.textContent = "Stop upload"; }
@@ -972,7 +986,10 @@ async function handleFiles(list){
     }
     const sharedBy = $("#sharedBy").value.trim();
     for (const f of singles){ const fd = dateFromFilename(f.name);
-      jobs.push({single:f, chat:"Added by hand", file:f.name, sender:sharedBy, dateMs: fd ? fd.ms : (f.lastModified || Date.now()), caption:""}); }
+      let when = opts.dateMs || 0;
+      if (!when && opts.photos) when = await exifDate(f);
+      if (!when) when = fd ? fd.ms : (f.lastModified || Date.now());
+      jobs.push({single:f, chat:"Added by hand", file:f.name, sender:opts.sender != null ? opts.sender : sharedBy, dateMs:when, caption:"", title:opts.title || ""}); }
     const before = jobs.length, kept = jobs.filter(inRange), outside = before - kept.length;
     jobs.length = 0; jobs.push(...kept);
     if (outside) logLine(outside + " file" + (outside === 1 ? " is" : "s are") + " outside the dates you chose, so " + (outside === 1 ? "it was" : "they were") + " left out.");
@@ -997,7 +1014,7 @@ async function handleFiles(list){
         if (prepared.blob.size > MAX_BYTES){ skipped.push([name, tooLargeMsg()]); continue; }
         const rec = {id, kind:c.kind, sender:j.sender || "", dateMs:j.dateMs || 0, chat:j.chat, filename:name, size:realSize, caption:j.caption || "",
           duration: prepared.duration != null ? Math.round(prepared.duration * 10) / 10 : null,
-          title:"", type:"", words:"", translation:"", story:"", place:""};
+          title:j.title || "", type:"", words:"", translation:"", story:"", place:""};
         await saveNew(rec, prepared);
         added++;
         logLine(kindWord(c.kind) + " from " + (rec.sender || "someone") + ", " + (rec.dateMs ? new Date(rec.dateMs).toLocaleDateString("en", {month:"short", day:"numeric", year:"numeric"}) : "date unknown"));
@@ -1028,6 +1045,42 @@ const drop = $("#drop");
 ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop", e => handleFiles(e.dataTransfer && e.dataTransfer.files));
 $("#fileInput").addEventListener("change", e => handleFiles(e.target.files));
+$("#photoInput").addEventListener("change", e => {
+  const files = [...e.target.files].filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif)$/i.test(f.name)); if (!files.length) return;
+  const d = $("#phDate").value;
+  handleFiles(files, {photos:true, sender:$("#phWho").value.trim() || S.myName || "", title:$("#phTitle").value.trim(), dateMs: d ? new Date(d + "T12:00").getTime() : 0})
+    .finally(() => { e.target.value = ""; $("#phDate").value = ""; $("#phTitle").value = ""; });   // fresh for the next batch
+  $("#progress").scrollIntoView({behavior:"smooth", block:"center"});
+});
+/* the date a photo was taken, from its EXIF data (JPEG only); 0 if there isn't one */
+async function exifDate(file){
+  try {
+    if (!/jpe?g$/i.test(file.type.split("/")[1] || file.name)) return 0;
+    const v = new DataView(await file.slice(0, 256 * 1024).arrayBuffer());
+    if (v.getUint16(0) !== 0xFFD8) return 0;
+    let o = 2;
+    while (o + 4 < v.byteLength){
+      const m = v.getUint16(o), len = v.getUint16(o + 2);
+      if (m === 0xFFE1 && v.getUint32(o + 4) === 0x45786966){              // "Exif"
+        const t = o + 10, le = v.getUint16(t) === 0x4949, u16 = a => v.getUint16(a, le), u32 = a => v.getUint32(a, le);
+        const str = (a, n) => { let r = ""; for (let i = 0; i < n; i++){ const c = v.getUint8(a + i); if (!c) break; r += String.fromCharCode(c); } return r; };
+        const read = (ifd, want) => { const n = u16(t + ifd); const out = {};
+          for (let i = 0; i < n; i++){ const e = t + ifd + 2 + i * 12, tag = u16(e);
+            if (want.includes(tag)) out[tag] = (tag === 0x8769) ? u32(e + 8) : str(t + u32(e + 8), 19); }
+          return out; };
+        const ifd0 = read(u32(t + 4), [0x8769, 0x0132]);
+        let s = ifd0[0x8769] ? read(ifd0[0x8769], [0x9003])[0x9003] : "";
+        s = s || ifd0[0x0132] || "";
+        const mm = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/.exec(s);
+        if (!mm || mm[1] === "0000") return 0;
+        return new Date(+mm[1], +mm[2] - 1, +mm[3], +mm[4], +mm[5]).getTime();
+      }
+      if ((m & 0xFF00) !== 0xFF00) break;
+      o += 2 + len;
+    }
+  } catch(e){}
+  return 0;
+}
 document.querySelectorAll("[data-howto]").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll("[data-howto]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   $("#howtoIos").hidden = b.dataset.howto !== "ios"; $("#howtoAndroid").hidden = b.dataset.howto !== "android"; }));
@@ -1799,7 +1852,7 @@ async function initSupabase(cfg){
   if (!fams.length){ if (guest){ S.signedIn = false; showGate("loginForm"); } else showGate("loginFamily"); return; }
   const fam = fams.find(f => f.id === lastFamily()) || fams[0];
   rememberFamily(fam.id);
-  S.family = fam; S.role = fam.role; S.canEdit = true; S.storage = true; S.myName = fam.me;
+  S.family = fam; S.role = fam.role; S.canEdit = true; S.storage = true; S.myName = fam.me; if (fam.me && !$("#phWho").value) $("#phWho").value = fam.me;
 
   /* in the archive */
   const {db, assets} = makeSupa(sb, fam.id); S.db = db; S.assets = assets;
@@ -1855,7 +1908,7 @@ $("#myNameSave").addEventListener("click", async () => {
   const n = $("#myName").value.trim();
   const {error} = await S.sb.rpc("set_my_name", {p_family:S.family.id, p_name:n});
   if (error){ toast("Couldn't save your name."); return; }
-  S.myName = n; $("#acctEmail").textContent = n || ($("#meEmail").textContent || ""); if (n) $("#sharedBy").value = n;
+  S.myName = n; $("#acctEmail").textContent = n || ($("#meEmail").textContent || ""); if (n){ $("#sharedBy").value = n; if (!$("#phWho").value) $("#phWho").value = n; }
   toast("Saved"); loadFamily();
 });
 $("#copyInvite").addEventListener("click", async () => {
