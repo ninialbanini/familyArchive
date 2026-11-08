@@ -141,6 +141,22 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .notecard{background:var(--paper);padding:20px 20px 18px;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.25);transform:rotate(1deg)}
 .notecard ol{margin:6px 0 0;padding-left:22px}.notecard li{margin:4px 0}
 .rangebox{margin:4px 0 14px}
+.treebar{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.treesug{margin:0 0 14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.treesug .chip{border:1px solid var(--line,#C9B39A);cursor:pointer;min-height:36px}
+.treebox{overflow-x:auto;margin:0 -60px;padding:0 60px 10px}.treesvg{display:block;margin:0 auto;max-width:none}
+.treesvg .tw{fill:none;stroke:#C08A3E;stroke-width:6;stroke-linejoin:round}
+.treesvg .knot{cursor:pointer;outline:none}.treesvg .knot:hover rect:first-child,.treesvg .knot:focus-visible rect:first-child{stroke:#E2B33C;stroke-width:4}
+.treesvg .ki{font:600 13px 'Source Sans 3',system-ui,sans-serif;fill:#F3E7CC;pointer-events:none}
+.treesvg .kn{font:600 15px 'Source Sans 3',system-ui,sans-serif;fill:#F3E7CC;paint-order:stroke;stroke:#5E0E10;stroke-width:4px}
+.treesvg .kf{font:500 15px 'Noto Nastaliq Urdu',serif;fill:#E9D8B4}
+.treesvg .kc{font:700 11px 'Source Sans 3',system-ui,sans-serif;fill:#2A1D14}
+.treesvg .kroot{font:13px 'Special Elite',monospace;letter-spacing:.3em;fill:#E9D8B4;opacity:.75}
+.treeempty{background:var(--card,#F6EEDD);padding:22px 24px;border-radius:4px;max-width:520px;box-shadow:0 6px 18px rgba(0,0,0,.18)}.treeempty h3{margin:0 0 6px;font-size:26px}
+.pshare{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line,#C9B39A)}
+.pshare .pp{width:44px;height:44px;flex:none;border:none;border-radius:999px;background:#E2B33C;color:#2A1D14;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pmedia{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:12px}
+.pmedia button{border:none;padding:0;aspect-ratio:1;background:#2A1D14;cursor:pointer;overflow:hidden;color:#F3E7CC;font-size:24px}.pmedia img{width:100%;height:100%;object-fit:cover;display:block}
+@media (max-width:640px){.treebox{margin:0 -18px;padding:0 18px 10px}}
 .photoadd{margin-top:22px;display:flex;flex-direction:column}
 .rangeseg{display:grid;grid-template-columns:1fr;border-radius:14px;margin-top:6px;max-width:340px}
 .rangeseg button{border-radius:10px;text-align:left;padding:0 14px}
@@ -472,6 +488,16 @@ dialog.listen::backdrop{background:#1B0E0B}
     <main id="feed"><p class="status">Opening the archive…</p></main>
   </section>
 
+  <section id="viewFamily" aria-labelledby="familyTitle" hidden>
+    <div class="ghead">
+      <div><span class="type" style="font-size:13px;color:var(--muted)" id="treeCount"></span><h2 id="familyTitle">Family tree</h2></div>
+      <p class="nast" lang="fa">شجره‌نامه</p>
+    </div>
+    <p style="margin:0 0 10px;max-width:60ch">The elders sit at the bottom, like roots; each generation grows above them. Tap a knot to hear and see what that person shared.</p>
+    <div class="treebar"><button type="button" class="btn primary" data-addperson="" id="treeAdd">Add a person</button></div>
+    <p id="treeSug" class="treesug" hidden></p>
+    <div id="treeBox" class="treebox"></div>
+  </section>
   <section id="viewPhotos" aria-labelledby="photosTitle" hidden>
     <div class="ghead">
       <div><span class="type" style="font-size:13px;color:var(--muted)" id="gCount"></span><h2 id="photosTitle">Photos &amp; videos</h2></div>
@@ -594,7 +620,7 @@ dialog.listen::backdrop{background:#1B0E0B}
   <a href="#listen" data-nav="listen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8c3-3 6 3 9 0s6 3 9 0M3 16c3-3 6 3 9 0s6 3 9 0"/></svg>Listen</a>
   <a href="#photos" data-nav="photos"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Photos</a>
   <a href="#add" data-nav="add" class="rec" aria-label="Upload voice notes and photos"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></a>
-  <button type="button" id="searchNav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>Search</button>
+  <a href="#family" data-nav="family"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21V12M12 12L6 7M12 12l6-5M6 7V4M18 7V4"/><rect x="9.5" y="17.5" width="5" height="5" transform="rotate(45 12 20)"/><rect x="3.5" y="5.5" width="5" height="5" transform="rotate(45 6 8)" /><rect x="15.5" y="5.5" width="5" height="5" transform="rotate(45 18 8)"/></svg>Family</a>
 </nav></div>
 
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlgwrap"><div class="dlg" id="dlgBody"></div></div></dialog>
@@ -620,7 +646,7 @@ dialog.listen::backdrop{background:#1B0E0B}
     </form>
     <p class="hand" style="font-size:20px;margin:8px 0 0">people already in stay in; the new password is for anyone joining next</p>
     <h3 class="serif" style="font-size:22px;margin:22px 0 0">Empty this archive</h3>
-    <p style="margin:4px 0 0">Deletes every voice note, photo and video in this family, for everyone. The family, its members and its password stay. This can't be undone.</p>
+    <p style="margin:4px 0 0">Deletes every voice note, photo and video in this family, and the family tree, for everyone. The family, its members and its password stay. This can't be undone.</p>
     <form id="emptyF" class="famadd" novalidate>
       <div class="field"><label for="emptyName">Type the family name to confirm: <b id="emptyNameHint"></b></label><input id="emptyName" type="text" autocomplete="off"></div>
       <button type="submit" class="btn danger" id="emptyBtn">Delete everything</button>
@@ -629,6 +655,7 @@ dialog.listen::backdrop{background:#1B0E0B}
   </div>
   <div class="dlgactions"><button type="button" class="btn ghost" id="otherFam">Join or start another family</button><button type="button" class="btn danger" id="leaveFam">Leave this family</button></div>
 </div></div></dialog>
+<dialog id="personDlg" aria-labelledby="personTitle"><div class="dlgwrap"><div class="dlg" id="personBody"></div></div></dialog>
 <dialog id="listenDlg" class="listen" aria-labelledby="lsTitle">
   <button type="button" class="lsClose" id="lsClose" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   <div class="lsWrap">
@@ -1669,22 +1696,216 @@ document.querySelectorAll("[data-gk]").forEach(b => b.addEventListener("click", 
   S.g.kind = b.dataset.gk; document.querySelectorAll("[data-gk]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderGallery(); }));
 $("#gSender").addEventListener("change", e => { S.g.sender = e.target.value; renderGallery(); });
 $("#gDecade").addEventListener("change", e => { S.g.decade = e.target.value; renderGallery(); });
-render = (orig => function(){ orig(); if (!$("#viewPhotos").hidden) renderGallery(); })(render);
+render = (orig => function(){ orig(); if (!$("#viewPhotos").hidden) renderGallery(); if (!$("#viewFamily").hidden) renderTree(); })(render);
+$("#treeAdd").hidden = false;
 
 function route(){
-  if (S.gate){ $("#viewLogin").hidden = false; $("#viewListen").hidden = true; $("#viewAdd").hidden = true; $("#viewPhotos").hidden = true; document.querySelector(".tabwrap").hidden = true; return; }
+  if (S.gate){ $("#viewLogin").hidden = false; $("#viewListen").hidden = true; $("#viewAdd").hidden = true; $("#viewPhotos").hidden = true; $("#viewFamily").hidden = true; document.querySelector(".tabwrap").hidden = true; return; }
   $("#viewLogin").hidden = true; document.querySelector(".tabwrap").hidden = false;
-  const view = location.hash === "#add" ? "add" : location.hash === "#photos" ? "photos" : "listen";
-  $("#viewAdd").hidden = view !== "add"; $("#viewListen").hidden = view !== "listen"; $("#viewPhotos").hidden = view !== "photos";
+  const view = location.hash === "#add" ? "add" : location.hash === "#photos" ? "photos" : location.hash === "#family" ? "family" : "listen";
+  $("#viewAdd").hidden = view !== "add"; $("#viewListen").hidden = view !== "listen"; $("#viewPhotos").hidden = view !== "photos"; $("#viewFamily").hidden = view !== "family";
   document.querySelectorAll("[data-nav]").forEach(a => { if (a.dataset.nav === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   if (view !== "add") render();
   window.scrollTo({top:0});
 }
 window.addEventListener("hashchange", route);
-$("#searchNav").addEventListener("click", () => { if (location.hash === "#add" || location.hash === "#photos") location.hash = "#listen"; setTimeout(() => { $("#fQ").focus(); $("#fQ").scrollIntoView({block:"center"}); }, 50); });
 const _observeImporter = new MutationObserver(() => { $("#addLocked").hidden = !$("#importer").hidden; });
 _observeImporter.observe($("#importer"), {attributes:true, attributeFilter:["hidden"]});
 
+
+/* ============ family tree, woven as a rug ============ */
+/* People are stored as items of kind "person" (no new database tables needed):
+   {kind:"person", name, nameFa, born, note, parents:[id,id], partner:id, aliases:[WhatsApp sender names]}
+   Elders sit at the bottom like roots; each generation is a row above. Tap a knot to see what that person shared. */
+const people = () => [...S.items.values()].filter(i => i.kind === "person");
+const normName = s => (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+function sharedBy(p){
+  const names = new Set([p.name, ...(p.aliases || [])].map(normName).filter(Boolean));
+  return [...S.items.values()].filter(i => i.kind !== "person" && names.has(normName(i.sender)));
+}
+function unlinkedSenders(){
+  const linked = new Set(); people().forEach(p => [p.name, ...(p.aliases || [])].forEach(n => linked.add(normName(n))));
+  const out = new Map();
+  for (const i of S.items.values()) if (i.kind !== "person" && i.sender && !linked.has(normName(i.sender))) out.set(normName(i.sender), (out.get(normName(i.sender)) || {name:i.sender, n:0}));
+  for (const i of S.items.values()) if (i.kind !== "person" && i.sender && out.has(normName(i.sender))) out.get(normName(i.sender)).n++;
+  return [...out.values()].sort((a, b) => b.n - a.n);
+}
+function treeLayout(){
+  const ps = people(), byId = new Map(ps.map(p => [p.id, p]));
+  const parentsOf = p => (p.parents || []).filter(id => byId.has(id));
+  const partnerOf = p => p.partner && byId.has(p.partner) ? byId.get(p.partner) : null;
+  // generation: elders 0, children above them; partners share a row
+  const gen = new Map(), seen = new Set();
+  const g = p => { if (gen.has(p.id)) return gen.get(p.id); if (seen.has(p.id)) return 0; seen.add(p.id);
+    const par = parentsOf(p); const v = par.length ? Math.max(...par.map(id => g(byId.get(id)))) + 1 : 0; gen.set(p.id, v); return v; };
+  ps.forEach(g);
+  for (let k = 0; k < 4; k++) ps.forEach(p => { const q = partnerOf(p); if (q){ const m = Math.max(gen.get(p.id), gen.get(q.id)); gen.set(p.id, m); gen.set(q.id, m); } });
+  // units: a person with their partner; children hang above the unit
+  const placed = new Map(), unitOf = new Map();
+  const kids = members => ps.filter(c => parentsOf(c).some(id => members.includes(id))).sort((a, b) => (a.born || 9999) - (b.born || 9999) || a.name.localeCompare(b.name));
+  const makeUnit = p => { const q = partnerOf(p), m = [p.id]; if (q && !unitOf.has(q.id)) m.push(q.id);
+    const u = {members:m, kids:[]}; m.forEach(id => unitOf.set(id, u)); return u; };
+  const build = p => { const u = makeUnit(p); for (const c of kids(u.members)) if (!unitOf.has(c.id)) u.kids.push(build(c)); return u; };
+  const roots = ps.filter(p => !parentsOf(p).length && !(partnerOf(p) && parentsOf(partnerOf(p)).length))
+    .sort((a, b) => (a.born || 9999) - (b.born || 9999) || a.name.localeCompare(b.name));
+  const units = []; roots.forEach(p => { if (!unitOf.has(p.id)) units.push(build(p)); });
+  ps.forEach(p => { if (!unitOf.has(p.id)) units.push(build(p)); });                 // anyone left over (odd links)
+  const width = u => (u.w = Math.max(u.members.length, u.kids.reduce((s, k) => s + width(k), 0)));
+  const place = (u, left) => { const c = left + u.w / 2; u.members.forEach((id, i) => placed.set(id, c - (u.members.length - 1) / 2 + i));
+    let x = left + (u.w - u.kids.reduce((s, k) => s + k.w, 0)) / 2; u.kids.forEach(k => { place(k, x); x += k.w; }); };
+  let x = 0; units.forEach(u => { width(u); place(u, x); x += u.w + .4; });
+  return {ps, byId, gen, placed, cols:Math.max(1, x - .4), rows:Math.max(1, ...[...gen.values()].map(v => v + 1)), parentsOf, partnerOf};
+}
+function renderTree(){
+  const box = $("#treeBox"); if (!box) return;
+  const L = treeLayout(), sug = unlinkedSenders();
+  $("#treeCount").textContent = L.ps.length ? L.ps.length + (L.ps.length === 1 ? " person" : " people") : "";
+  $("#treeSug").innerHTML = sug.length ? `<span style="font-weight:600">Shared things but not in the tree yet:</span> ` +
+    sug.slice(0, 12).map(s => `<button type="button" class="chip" data-sug="${esc(s.name)}">${esc(s.name)} <span style="opacity:.7">· ${s.n}</span></button>`).join(" ") : "";
+  $("#treeSug").hidden = !sug.length;
+  if (!L.ps.length){
+    box.innerHTML = `<div class="treeempty"><h3 class="serif">Start your family tree</h3><p>Add the eldest person you know of first, then their children, grandchildren and so on. Each person becomes a knot in the rug, and tapping them shows everything they shared.</p>
+      ${S.canEdit ? `<button type="button" class="btn primary" data-addperson="">Add the first person</button>` : ""}</div>`;
+    return;
+  }
+  const CW = 124, RH = 134, PADX = 46, PADT = 54, PADB = 64;
+  const W = Math.max(Math.min(box.clientWidth - 8, 900), 320, L.cols * CW + PADX * 2), H = L.rows * RH + PADT + PADB, OX = (W - L.cols * CW) / 2;
+  const X = id => OX + (L.placed.get(id) + .5) * CW, Y = id => H - PADB - (L.gen.get(id) + .5) * RH;
+  let lines = "", knots = "";
+  // partner bars
+  L.ps.forEach(p => { const q = L.partnerOf(p); if (q && p.id < q.id && L.placed.has(q.id)){ const y = Y(p.id);
+    lines += `<path d="M${X(p.id)} ${y} H${X(q.id)}" class="tw"/>`; } });
+  // parent to child: up from the couple's middle, across, up to the child
+  L.ps.forEach(c => { const par = L.parentsOf(c); if (!par.length) return;
+    const px = par.reduce((s, id) => s + X(id), 0) / par.length, py = Math.min(...par.map(Y)), cx = X(c.id), cy = Y(c.id), my = (py + cy) / 2 + 8;
+    lines += `<path d="M${px} ${py} V${my} H${cx} V${cy}" class="tw"/>`; });
+  L.ps.forEach(p => { const x = X(p.id), y = Y(p.id), n = sharedBy(p).length, col = avColor(p.name);
+    knots += `<g class="knot" data-person="${esc(p.id)}" tabindex="0" role="button" aria-label="${esc(p.name)}${n ? ", shared " + n : ""}">
+      <rect x="${x - 21}" y="${y - 21}" width="42" height="42" transform="rotate(45 ${x} ${y})" fill="#E9D8B4" stroke="#240A0A" stroke-width="3"/>
+      <rect x="${x - 13}" y="${y - 13}" width="26" height="26" transform="rotate(45 ${x} ${y})" fill="${col}"/>
+      <text x="${x}" y="${y + 5}" text-anchor="middle" class="ki">${esc(initials(p.name))}</text>
+      <text x="${x}" y="${y + 46}" text-anchor="middle" class="kn">${esc(p.name.length > 16 ? p.name.slice(0, 15) + "…" : p.name)}</text>
+      ${p.nameFa ? `<text x="${x}" y="${y + 66}" text-anchor="middle" class="kf" lang="fa">${esc(p.nameFa)}</text>` : ""}
+      ${n ? `<g transform="translate(${x + 18} ${y - 30})"><rect x="-2" y="-11" width="${12 + String(n).length * 7}" height="16" rx="8" fill="#E2B33C"/><text x="${4 + String(n).length * 3.5}" y="1" text-anchor="middle" class="kc">${n}</text></g>` : ""}
+    </g>`; });
+  box.innerHTML = `<svg class="treesvg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="group" aria-label="Family tree">
+    <rect x="0" y="0" width="${W}" height="${H}" fill="url(#g-brd)"/>
+    <rect x="16" y="16" width="${W - 32}" height="${H - 32}" fill="#E6D5B5"/>
+    <rect x="22" y="22" width="${W - 44}" height="${H - 44}" fill="#8E1A17"/>
+    <rect x="22" y="22" width="${W - 44}" height="${H - 44}" fill="url(#g-rugA)" opacity=".18"/>
+    <rect x="30" y="30" width="${W - 60}" height="${H - 60}" fill="none" stroke="#E9D8B4" stroke-width="2" stroke-dasharray="6 5" opacity=".7"/>
+    <text x="${W / 2}" y="${H - 34}" text-anchor="middle" class="kroot">ROOTS</text>
+    ${lines}${knots}</svg>`;
+  box.scrollLeft = Math.max(0, (W - box.clientWidth) / 2);
+}
+/* person dialog: what they shared, how they're related, edit */
+function openPerson(id){
+  const p = S.items.get(id); if (!p) return; const L = treeLayout();
+  const name = i => (L.byId.get(i) || {}).name || "";
+  const parents = L.parentsOf(p).map(name), partner = L.partnerOf(p), kidsOf = L.ps.filter(c => L.parentsOf(c).includes(p.id));
+  const items = sharedBy(p).sort((a, b) => (b.dateMs || 0) - (a.dateMs || 0));
+  const voices = items.filter(i => i.kind === "voice"), media = items.filter(i => i.kind !== "voice");
+  const rel = (label, list) => list.length ? `<p style="margin:2px 0"><b>${label}:</b> ${list.map(x => `<button type="button" class="linkbtn" data-person-go="${esc(x.id)}">${esc(x.name)}</button>`).join(", ")}</p>` : "";
+  $("#personBody").innerHTML = `<button type="button" class="close" data-close-person aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div style="display:flex;gap:14px;align-items:center"><span class="av" style="background:${avColor(p.name)};width:52px;height:52px;font-size:20px" aria-hidden="true">${esc(initials(p.name))}</span>
+      <div><h2 id="personTitle" class="serif" style="margin:0;font-size:30px">${esc(p.name)}</h2>${p.nameFa ? `<p class="nast" lang="fa" dir="rtl" style="margin:0;font-size:20px">${esc(p.nameFa)}</p>` : ""}</div></div>
+    ${p.born || p.note ? `<p style="margin:10px 0 0">${p.born ? "Born " + esc(String(p.born)) : ""}${p.born && p.note ? " · " : ""}${esc(p.note || "")}</p>` : ""}
+    <div style="margin-top:10px">${rel("Parents", L.parentsOf(p).map(i => L.byId.get(i)))}${rel("Partner", partner ? [partner] : [])}${rel("Children", kidsOf)}</div>
+    ${S.canEdit ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button type="button" class="btn ghost" data-addperson="child" data-of="${esc(p.id)}">Add a child</button>
+      <button type="button" class="btn ghost" data-addperson="parent" data-of="${esc(p.id)}">Add a parent</button>
+      ${partner ? "" : `<button type="button" class="btn ghost" data-addperson="partner" data-of="${esc(p.id)}">Add a partner</button>`}
+      <button type="button" class="btn ghost" data-editperson="${esc(p.id)}">Edit</button></div>` : ""}
+    <h3 class="serif" style="font-size:22px;margin:20px 0 6px">What ${esc(p.name.split(" ")[0])} shared</h3>
+    ${!items.length ? `<p style="color:var(--muted);margin:0">Nothing yet. If they send voice notes under another name on WhatsApp, add that name with Edit.</p>` : ""}
+    ${voices.map(v => `<div class="pshare"><button type="button" class="pp" data-listen="${esc(v.id)}" aria-label="Play ${esc(v.title || "voice note")}">${ICON_PLAY}</button>
+      <div><b>${esc(v.title || "Untitled voice note")}</b><br><span style="font-size:14px;color:var(--muted)">${esc(fmtDate(v.dateMs))}${v.duration ? " · " + fmtDur(v.duration) : ""}</span></div></div>`).join("")}
+    ${media.length ? `<div class="pmedia">${media.slice(0, 24).map(m => m.kind === "photo"
+      ? `<button type="button" data-open="${esc(m.id)}" aria-label="Open photo"><img src="${esc(srcFor(m))}" alt="${esc(m.title || "Family photo")}" loading="lazy"></button>`
+      : `<button type="button" data-open="${esc(m.id)}" aria-label="Play video" class="pvid">▶</button>`).join("")}</div>` : ""}`;
+  const d = $("#personDlg"); if (!d.open) d.showModal();
+}
+/* add or edit a person */
+function personForm(mode, ofId, editId){
+  const L = treeLayout(), p = editId ? S.items.get(editId) : null, of = ofId ? S.items.get(ofId) : null;
+  const opts = (sel, skip) => `<option value="">None</option>` + L.ps.filter(x => x.id !== skip).sort((a, b) => a.name.localeCompare(b.name))
+    .map(x => `<option value="${esc(x.id)}"${x.id === sel ? " selected" : ""}>${esc(x.name)}</option>`).join("");
+  const par = p ? (p.parents || []) : mode === "child" && of ? [of.id, of.partner || ""] : [];
+  const partner = p ? p.partner || "" : mode === "partner" && of ? of.id : "";
+  const senders = [...new Set([...S.items.values()].filter(i => i.kind !== "person" && i.sender).map(i => i.sender))].sort((a, b) => a.localeCompare(b));
+  const aliases = p ? (p.aliases || []) : [];
+  const title = p ? "Edit " + p.name : mode === "child" ? "Add a child of " + of.name : mode === "parent" ? "Add a parent of " + of.name : mode === "partner" ? "Add " + of.name + "'s partner" : "Add a person";
+  $("#personBody").innerHTML = `<button type="button" class="close" data-close-person aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="personTitle" class="serif" style="margin:0 0 12px;font-size:28px">${esc(title)}</h2>
+    <form id="personF" class="formgrid" novalidate data-mode="${esc(mode || "")}" data-of="${esc(ofId || "")}" data-edit="${esc(editId || "")}">
+      <div class="field"><label for="pfName">Name</label><input id="pfName" type="text" required autocomplete="off" value="${esc(p ? p.name : "")}"></div>
+      <div class="field"><label for="pfFa">Name in Dari <span style="font-weight:400">(optional)</span></label><input id="pfFa" type="text" dir="rtl" lang="fa" autocomplete="off" value="${esc(p ? p.nameFa || "" : "")}"></div>
+      <div class="field"><label for="pfBorn">Year born <span style="font-weight:400">(optional)</span></label><input id="pfBorn" type="number" min="1800" max="2100" inputmode="numeric" value="${esc(p && p.born ? String(p.born) : "")}"></div>
+      <div class="field"><label for="pfNote">A short note <span style="font-weight:400">(optional)</span></label><input id="pfNote" type="text" placeholder="From Jaghori; loved to sing" autocomplete="off" value="${esc(p ? p.note || "" : "")}"></div>
+      <div class="field"><label for="pfP1">Parent</label><select id="pfP1">${opts(par[0] || "", editId)}</select></div>
+      <div class="field"><label for="pfP2">Other parent</label><select id="pfP2">${opts(par[1] || "", editId)}</select></div>
+      <div class="field"><label for="pfPartner">Partner</label><select id="pfPartner">${opts(partner, editId)}</select></div>
+      <div class="field"><label for="pfAlias">Their name on WhatsApp <span style="font-weight:400">(links what they shared)</span></label>
+        <select id="pfAlias"><option value="">Same as their name</option>${senders.map(s => `<option${aliases.includes(s) ? " selected" : ""}>${esc(s)}</option>`).join("")}</select></div>
+      ${mode === "parent" && of ? `<p class="full" style="margin:0;color:var(--muted)">This person will be added as a parent of ${esc(of.name)}.</p>` : ""}
+      <p class="full" id="pfErr" style="margin:0;color:var(--red);font-weight:600" aria-live="polite"></p>
+      <div class="full" style="display:flex;gap:10px;flex-wrap:wrap"><button type="submit" class="btn primary">Save</button>
+        ${p ? `<button type="button" class="btn ghost danger" id="pfDel">Remove from the tree</button>` : ""}</div>
+    </form>`;
+  const d = $("#personDlg"); if (!d.open) d.showModal(); $("#pfName").focus();
+}
+async function savePerson(id, data){
+  const prev = S.items.get(id) || {};
+  const doc = {...prev, ...data, kind:"person", updatedAt:Date.now()}; delete doc.id;
+  if (!prev.kind) doc.createdAt = Date.now();
+  if (S.db) await S.db.doc("items/" + id).set(doc);
+  S.items.set(id, {...doc, id});
+}
+$("#personDlg").addEventListener("submit", async e => {
+  if (e.target.id !== "personF") return; e.preventDefault();
+  const f = e.target, err = $("#pfErr"), name = $("#pfName").value.trim();
+  if (!name){ err.textContent = "Add a name first."; $("#pfName").focus(); return; }
+  const id = f.dataset.edit || ("person-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  const parents = [$("#pfP1").value, $("#pfP2").value].filter((v, i, a) => v && a.indexOf(v) === i);
+  const partner = $("#pfPartner").value || "", alias = $("#pfAlias").value;
+  const born = parseInt($("#pfBorn").value, 10);
+  try {
+    f.querySelector("[type=submit]").disabled = true;
+    const old = S.items.get(id) || {};
+    await savePerson(id, {name, nameFa:$("#pfFa").value.trim(), born: isFinite(born) ? born : null, note:$("#pfNote").value.trim(), parents, partner, aliases: alias ? [alias] : []});
+    if (old.partner && old.partner !== partner && S.items.get(old.partner)){ const o = S.items.get(old.partner); if (o.partner === id) await savePerson(o.id, {partner:""}); }
+    if (partner && S.items.get(partner)){ const q = S.items.get(partner); if (q.partner !== id){ if (q.partner && S.items.get(q.partner)) await savePerson(q.partner, {partner:""}); await savePerson(partner, {partner:id}); } }
+    if (f.dataset.mode === "parent" && f.dataset.of){ const c = S.items.get(f.dataset.of); if (c){ const ps = [...(c.parents || [])].filter(x => S.items.get(x)); if (!ps.includes(id)){ if (ps.length >= 2) ps.pop(); ps.push(id); await savePerson(c.id, {parents:ps}); } } }
+    $("#personDlg").close(); toast(f.dataset.edit ? "Saved" : name + " is in the tree"); renderTree();
+  } catch(ex){ err.textContent = "Couldn't save that. Check your connection and try again."; f.querySelector("[type=submit]").disabled = false; }
+});
+$("#personDlg").addEventListener("click", async e => {
+  const t = e.target.closest("button, [data-person-go]"); if (!t) return;
+  if (t.hasAttribute("data-close-person")) return $("#personDlg").close();
+  if (t.dataset.personGo) return openPerson(t.dataset.personGo);
+  if (t.dataset.addperson !== undefined) return personForm(t.dataset.addperson, t.dataset.of || null, null);
+  if (t.dataset.editperson) return personForm("", null, t.dataset.editperson);
+  if (t.dataset.listen){ $("#personDlg").close(); return openListen(t.dataset.listen, 0); }
+  if (t.dataset.open){ $("#personDlg").close(); return openDetail(t.dataset.open); }
+  if (t.id === "pfDel"){
+    const id = $("#personF").dataset.edit, p = S.items.get(id); if (!p) return;
+    if (!confirm("Remove " + p.name + " from the tree? What they shared stays in the archive.")) return;
+    try {
+      for (const o of people()){ const patch = {};
+        if ((o.parents || []).includes(id)) patch.parents = o.parents.filter(x => x !== id);
+        if (o.partner === id) patch.partner = "";
+        if (Object.keys(patch).length) await savePerson(o.id, patch); }
+      if (S.db) await S.db.doc("items/" + id).delete(); S.items.delete(id);
+      $("#personDlg").close(); toast(p.name + " was removed from the tree"); renderTree();
+    } catch(ex){ $("#pfErr").textContent = "Couldn't remove them. Try again."; }
+  }
+});
+$("#viewFamily").addEventListener("click", e => {
+  const k = e.target.closest("[data-person]"); if (k) return openPerson(k.dataset.person);
+  const s = e.target.closest("[data-sug]"); if (s && S.canEdit){ personForm("", null, null); $("#pfName").value = s.dataset.sug; const a = [...$("#pfAlias").options].find(o => o.value === s.dataset.sug); if (a) a.selected = true; return; }
+  const a = e.target.closest("[data-addperson]"); if (a && S.canEdit) return personForm(a.dataset.addperson || "", a.dataset.of || null, null);
+});
+$("#viewFamily").addEventListener("keydown", e => { const k = e.target.closest("[data-person]"); if (k && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); openPerson(k.dataset.person); } });
 
 /* ===== Supabase: accounts and private families ===== */
 S.signed = new Map(); S.backend = "claude"; S.gate = false;
