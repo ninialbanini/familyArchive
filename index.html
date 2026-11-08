@@ -463,11 +463,7 @@ dialog.listen::backdrop{background:#1B0E0B}
 
   <section id="viewListen" aria-label="Listen">
     <div class="toolbar" id="toolbar" role="search">
-      <div class="seg" role="group" aria-label="Show">
-        <button type="button" data-tab="all" aria-pressed="true">All <span data-count="all"></span></button>
-        <button type="button" data-tab="voice" aria-pressed="false">Voice notes <span data-count="voice"></span></button>
-        <button type="button" data-tab="video" aria-pressed="false">Videos <span data-count="video"></span></button>
-      </div>
+      <span id="listN" style="font-weight:600;align-self:center"></span>
       <label class="sr" for="fSender">Filter by sender</label><select id="fSender"><option value="">Everyone</option></select>
       <label class="sr" for="fType">Filter by type</label><select id="fType"><option value="">All types</option></select>
       <label class="sr" for="fSort">Sort</label><select id="fSort"><option value="new">Newest first</option><option value="old">Oldest first</option></select>
@@ -1110,7 +1106,7 @@ function playerHTML(it, big){
     <audio preload="none" src="${esc(srcFor(it))}"></audio></div>`;
 }
 function filtered(){
-  const f = S.f; let arr = [...S.items.values()].filter(i => i.kind !== "photo");   // photos live in the Photos tab only
+  const f = S.f; let arr = [...S.items.values()].filter(i => i.kind === "voice");   // photos and videos live in the Photos tab only
   if (f.tab !== "all") arr = arr.filter(i => i.kind === f.tab);
   if (f.sender) arr = arr.filter(i => (i.sender || "") === f.sender);
   if (f.type) arr = arr.filter(i => f.type === "__none" ? (i.kind === "voice" && !i.type) : i.type === f.type);
@@ -1124,8 +1120,9 @@ function updateStats(){
   const voices = new Set(v.map(i => (i.sender || "").trim()).filter(Boolean));
   $("#stats").innerHTML = `<span><b>${v.length}</b>voice notes</span><span><b>${p.length}</b>photos</span><span><b>${voices.size}</b>family voices</span>`;
   const set = (k, n) => { const s = document.querySelector(`[data-count="${k}"]`); if (s) s.textContent = "(" + n + ")"; };
+  { const ln = $("#listN"); if (ln) ln.textContent = v.length + (v.length === 1 ? " voice note" : " voice notes"); }
   set("all", all.length - p.length); set("voice", v.length); set("photo", p.length); set("video", vi.length);
-  const senders = [...new Set(all.filter(i => i.kind !== "photo").map(i => i.sender || ""))].sort((a, b) => a.localeCompare(b));
+  const senders = [...new Set(all.filter(i => i.kind === "voice").map(i => i.sender || ""))].sort((a, b) => a.localeCompare(b));
   const sel = $("#fSender"), keep = S.f.sender;
   sel.innerHTML = '<option value="">Everyone</option>' + senders.map(s => `<option value="${esc(s)}">${esc(s || "Unknown sender")}</option>`).join("");
   sel.value = senders.includes(keep) ? keep : ""; if (sel.value !== keep) S.f.sender = "";
