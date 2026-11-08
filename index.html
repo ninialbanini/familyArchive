@@ -222,6 +222,7 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .tabbar{background:var(--sheet);clip-path:polygon(0.00% 6.29%,1.74% 2.54%,5.17% 0.61%,6.63% 0.45%,8.57% 1.11%,10.75% 3.43%,12.61% 4.06%,15.61% 2.23%,17.22% 6.89%,19.55% 0.55%,21.08% 5.08%,23.42% 6.56%,26.54% 0.57%,29.68% 6.76%,33.42% 5.95%,36.24% 6.45%,39.48% 2.93%,41.44% 0.09%,42.91% 2.80%,44.37% 0.92%,46.75% 1.79%,50.42% 1.30%,53.06% 3.64%,55.32% 5.53%,58.95% 5.84%,60.37% 2.48%,62.66% 6.39%,65.63% 2.61%,68.67% 6.82%,70.14% 6.81%,71.64% 0.06%,73.01% 6.04%,75.04% 6.08%,77.82% 0.36%,81.49% 1.13%,85.11% 6.23%,87.72% 0.55%,89.18% 1.63%,90.93% 5.24%,92.70% 3.06%,94.18% 5.91%,96.28% 0.18%,99.36% 4.82%,100.00% 0.00%,100.00% 100.00%,0.00% 100.00%);height:78px;display:flex;align-items:center;justify-content:space-around;padding:10px 10px 0}
 .tabbar a,.tabbar button{min-width:64px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:var(--muted);font-size:13px;border:none;background:none;cursor:pointer}
 .tabbar [aria-current="page"]{color:var(--red-ink);font-weight:600}
+.tabbar{display:grid !important;grid-template-columns:1fr 1fr 76px 2fr;justify-items:center;align-items:center}   /* upload button sits in the exact middle */
 .tabbar .rec{width:62px;height:62px;min-width:0;border-radius:999px;background:var(--red);color:#F7F0E4;border:3px solid var(--sheet);margin-top:-30px;box-shadow:0 4px 10px rgba(0,0,0,.35)}
 
 /* empty */
@@ -1768,9 +1769,9 @@ function renderTree(){
       ${S.canEdit ? `<button type="button" class="btn primary" data-addperson="">Add the first person</button>` : ""}</div>`;
     return;
   }
-  const CW = 124, RH = 134, PADX = 46, PADT = 54, PADB = 64;
-  const W = Math.max(Math.min(box.clientWidth - 8, 900), 320, L.cols * CW + PADX * 2), H = L.rows * RH + PADT + PADB, OX = (W - L.cols * CW) / 2;
-  const X = id => OX + (L.placed.get(id) + .5) * CW, Y = id => H - PADB - (L.gen.get(id) + .5) * RH;
+  const narrow = box.clientWidth < 560, CW = narrow ? 98 : 124, RH = 134, PADX = narrow ? 28 : 46, PADT = 54, PADB = 64;
+  const W = Math.max(Math.min(box.clientWidth - 40, 900), 300, L.cols * CW + PADX * 2), H = L.rows * RH + PADT + PADB, OX = (W - L.cols * CW) / 2;
+  const X = id => OX + L.placed.get(id) * CW, Y = id => H - PADB - (L.gen.get(id) + .5) * RH;
   let lines = "", knots = "";
   // partner bars
   L.ps.forEach(p => { const q = L.partnerOf(p); if (q && p.id < q.id && L.placed.has(q.id)){ const y = Y(p.id);
@@ -1796,7 +1797,7 @@ function renderTree(){
     <rect x="30" y="30" width="${W - 60}" height="${H - 60}" fill="none" stroke="#E9D8B4" stroke-width="2" stroke-dasharray="6 5" opacity=".7"/>
     <text x="${W / 2}" y="${H - 34}" text-anchor="middle" class="kroot">ROOTS</text>
     ${lines}${knots}</svg>`;
-  box.scrollLeft = Math.max(0, (W - box.clientWidth) / 2);
+  box.scrollLeft = Math.max(0, (box.scrollWidth - box.clientWidth) / 2);
 }
 /* person dialog: what they shared, how they're related, edit */
 function openPerson(id){
