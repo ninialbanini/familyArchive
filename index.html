@@ -528,16 +528,16 @@ dialog.listen::backdrop{background:#1B0E0B}
           <label class="check"><input type="checkbox" id="incVideo"> Also import videos from chat exports</label>
         </div>
         <div class="notecard photoadd" id="photoAdd"><span class="tape" aria-hidden="true"></span>
-          <span class="mono" style="font-family:'Special Elite',monospace;letter-spacing:.12em;font-size:13px">ADD PHOTOS, NOT FROM WHATSAPP</span>
+          <span class="mono" style="font-family:'Special Elite',monospace;letter-spacing:.12em;font-size:13px">ADD PHOTOS &amp; VIDEOS, NOT FROM WHATSAPP</span>
           <p style="margin:6px 0 10px">From your camera roll, your computer, or scans of old prints.</p>
           <div class="formgrid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px">
             <div class="field"><label for="phWho">Shared by</label><input id="phWho" type="text" placeholder="e.g. Bibi" autocomplete="off"></div>
             <div class="field"><label for="phDate">When was it taken? <span style="font-weight:400">(optional)</span></label><input id="phDate" type="date"></div>
-            <div class="field" style="grid-column:1/-1"><label for="phTitle">Title <span style="font-weight:400">(optional, for all the photos you pick now)</span></label><input id="phTitle" type="text" placeholder="e.g. Nowruz in Quetta" autocomplete="off"></div>
+            <div class="field" style="grid-column:1/-1"><label for="phTitle">Title <span style="font-weight:400">(optional, for everything you pick now)</span></label><input id="phTitle" type="text" placeholder="e.g. Nowruz in Quetta" autocomplete="off"></div>
           </div>
-          <input type="file" id="photoInput" class="sr" multiple accept="image/jpeg,image/png,image/webp,image/gif">
-          <label for="photoInput" class="btn primary" style="cursor:pointer;margin-top:12px;align-self:flex-start">Choose photos</label>
-          <p style="margin:8px 0 0;font-size:15px;color:var(--muted)">If you leave the date empty, the date the photo was taken is read from the photo itself when it has one.</p>
+          <input type="file" id="photoInput" class="sr" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm,.mov,.m4v">
+          <label for="photoInput" class="btn primary" style="cursor:pointer;margin-top:12px;align-self:flex-start">Choose photos or videos</label>
+          <p style="margin:8px 0 0;font-size:15px;color:var(--muted)">If you leave the date empty, the date a photo was taken is read from the photo itself when it has one. Videos can be up to 50 MB each; for longer clips, trim them or send them through WhatsApp first, which makes them smaller.</p>
         </div>
       </div>
       <div class="notecard howto"><span class="tape" aria-hidden="true"></span>
@@ -659,7 +659,7 @@ const TYPE_LABEL = Object.fromEntries(TYPES);
 const AV_COLORS = ["#7A1616","#1E2340","#6B4A1E","#1F5E3A","#A23B1E","#4E0F14","#2E4A7A"];
 const VOICE_EXT = ["opus","ogg","oga","m4a","mp3","wav","aac","webm"];
 const PHOTO_EXT = {jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp",gif:"image/gif"};
-const VIDEO_EXT = {mp4:"video/mp4"};
+const VIDEO_EXT = {mp4:"video/mp4", m4v:"video/mp4", mov:"video/quicktime", webm:"video/webm"};
 
 /* ============ state ============ */
 const S = {
@@ -896,7 +896,7 @@ function probeDuration(blob){
 /* convert one media blob into something storage accepts */
 async function prepare(blob, name, kind, typeHint){
   if (kind === "photo") return {blob, type:typeHint};
-  if (kind === "video") return {blob, type:"video/mp4"};
+  if (kind === "video") return {blob, type:typeHint || "video/mp4"};
   const e = extOf(name);
   if (e === "m4a") return {blob, type:"video/mp4", duration: await probeDuration(blob)};
   if (e === "webm") return {blob, type:"video/webm", duration: await probeDuration(blob)};
@@ -1049,7 +1049,7 @@ const drop = $("#drop");
 drop.addEventListener("drop", e => handleFiles(e.dataTransfer && e.dataTransfer.files));
 $("#fileInput").addEventListener("change", e => handleFiles(e.target.files));
 $("#photoInput").addEventListener("change", e => {
-  const files = [...e.target.files].filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif)$/i.test(f.name)); if (!files.length) return;
+  const files = [...e.target.files].filter(f => /^(image|video)\//.test(f.type) || /\.(jpe?g|png|webp|gif|mp4|m4v|mov|webm)$/i.test(f.name)); if (!files.length) return;
   const d = $("#phDate").value;
   handleFiles(files, {photos:true, sender:$("#phWho").value.trim() || S.myName || "", title:$("#phTitle").value.trim(), dateMs: d ? new Date(d + "T12:00").getTime() : 0})
     .finally(() => { e.target.value = ""; $("#phDate").value = ""; $("#phTitle").value = ""; });   // fresh for the next batch
