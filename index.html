@@ -123,7 +123,10 @@ video{width:100%;max-height:360px;background:#000;border-radius:4px}
 .teahead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px}
 .teahead h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(32px,5vw,46px);line-height:1.02;max-width:520px}
 .teahead .nast{font-size:clamp(30px,5vw,42px);line-height:2.2;color:var(--red-ink)}
-.addgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;margin-top:18px;position:relative;z-index:2}
+.addgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,.9fr);gap:28px;margin-top:18px;position:relative;z-index:2;align-items:start}
+.notecard.howto{padding:16px 18px 14px;font-size:15px;line-height:1.4;max-width:340px}
+.notecard.howto ol{margin:8px 0 0;padding-left:20px}.notecard.howto li{margin:3px 0}
+.notecard.howto .seg button{min-height:34px;padding:0 12px;font-size:14px}
 @media (max-width:820px){.addgrid{grid-template-columns:minmax(0,1fr)}}
 .promptwrap{filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));transform:rotate(-.8deg);position:relative}
 .prompt{background:var(--kraft);clip-path:polygon(100.00% 0.00%,100.00% 100.00%,100.00% 99.47%,98.88% 99.65%,96.52% 99.73%,95.26% 99.51%,93.59% 99.21%,92.32% 99.04%,91.48% 99.21%,89.77% 99.10%,88.73% 99.31%,86.41% 99.33%,85.43% 99.08%,83.08% 99.89%,80.96% 99.92%,80.03% 99.20%,78.07% 99.04%,76.26% 99.49%,75.03% 99.43%,72.64% 99.35%,70.44% 99.80%,68.46% 99.27%,67.55% 99.18%,66.47% 99.78%,65.57% 99.34%,64.54% 99.02%,63.74% 99.19%,61.73% 99.43%,60.01% 99.20%,58.19% 99.86%,56.12% 99.65%,54.39% 99.49%,52.14% 99.59%,49.97% 99.92%,48.65% 99.33%,46.87% 99.17%,45.74% 99.20%,43.67% 99.86%,42.64% 99.42%,40.28% 99.39%,38.80% 99.49%,36.70% 99.48%,35.04% 99.41%,32.75% 99.20%,30.61% 99.73%,28.85% 99.18%,26.90% 99.05%,24.64% 99.87%,23.02% 99.64%,21.89% 99.50%,19.52% 99.23%,18.56% 99.75%,17.17% 99.11%,15.64% 99.84%,13.96% 99.75%,13.09% 99.41%,10.71% 99.22%,8.73% 99.85%,7.03% 99.36%,5.02% 99.55%,4.13% 99.07%,2.91% 99.26%,1.36% 99.22%,0.02% 99.91%,0.00% 100.00%,0.58% 100.00%,0.48% 98.13%,0.45% 96.47%,0.21% 94.69%,1.13% 92.69%,1.03% 92.05%,0.83% 90.20%,0.88% 89.43%,0.75% 87.60%,1.14% 85.46%,1.11% 83.84%,0.36% 83.01%,0.63% 81.56%,0.76% 79.44%,0.75% 77.85%,0.48% 75.73%,0.72% 73.95%,0.41% 72.71%,0.01% 71.86%,0.36% 70.72%,0.58% 69.99%,1.11% 68.83%,0.80% 66.98%,0.33% 65.03%,0.73% 64.24%,1.18% 63.28%,1.06% 62.00%,0.11% 61.00%,0.83% 59.40%,1.11% 58.39%,0.82% 56.23%,1.18% 54.06%,0.88% 53.23%,0.88% 51.43%,0.65% 50.29%,1.02% 48.75%,0.45% 48.07%,0.95% 46.96%,0.07% 46.18%,0.14% 45.39%,1.04% 44.10%,0.12% 42.93%,0.40% 41.26%,0.90% 39.74%,0.88% 38.41%,1.02% 36.82%,1.08% 35.00%,0.34% 33.21%,0.93% 31.80%,0.88% 29.94%,0.99% 28.00%,0.77% 26.53%,0.57% 25.86%,1.10% 24.10%,0.53% 22.14%,1.06% 21.17%,0.23% 19.52%,1.05% 18.86%,0.13% 17.34%,0.70% 15.15%,0.97% 13.34%,0.63% 12.33%,0.73% 11.45%,0.95% 10.16%,0.25% 9.37%,0.00% 8.15%,1.16% 6.90%,0.22% 4.92%,0.27% 2.99%,0.77% 2.00%,0.24% 0.93%,0.21% 0.20%);padding:22px 22px 24px 28px;display:flex;flex-direction:column;gap:10px}
@@ -537,8 +540,8 @@ dialog.listen::backdrop{background:#1B0E0B}
           <p style="margin:8px 0 0;font-size:15px;color:var(--muted)">If you leave the date empty, the date the photo was taken is read from the photo itself when it has one.</p>
         </div>
       </div>
-      <div class="notecard"><span class="tape" aria-hidden="true"></span>
-        <strong class="serif" style="font-size:22px">How to export a chat</strong>
+      <div class="notecard howto"><span class="tape" aria-hidden="true"></span>
+        <strong class="serif" style="font-size:18px">How to export a chat</strong>
         <div class="seg" role="group" aria-label="Phone type" style="margin-top:8px;align-self:flex-start;display:inline-flex">
           <button type="button" data-howto="ios" aria-pressed="true">iPhone</button>
           <button type="button" data-howto="android" aria-pressed="false">Android</button>
@@ -547,13 +550,13 @@ dialog.listen::backdrop{background:#1B0E0B}
           <li>Open the family chat and tap the group or contact name at the top.</li>
           <li>Scroll down, tap <b>Export Chat</b>, then <b>Attach Media</b>.</li>
           <li>Save the .zip to Files or send it to your computer.</li>
-          <li>Drop it here. Importing the same chat again only adds what's new.</li>
+          <li>Drop it here.</li>
         </ol>
         <ol id="howtoAndroid" hidden>
           <li>Open the family chat, tap the three dots, then <b>More</b>.</li>
           <li>Tap <b>Export chat</b>, then <b>Include media</b>.</li>
           <li>Save the .zip to Drive or send it to your computer.</li>
-          <li>Drop it here. Importing the same chat again only adds what's new.</li>
+          <li>Drop it here.</li>
         </ol>
       </div>
     </div>
